@@ -213,7 +213,7 @@ def generate_html(report: dict, bounty_id: int, output_path: str | Path | None =
           <div class="p-header">
             <a href="{user_url}" target="_blank" class="p-username">@{html.escape(username)}</a>
             <div class="p-meta">
-              <span class="p-count">{n} entr{'ée' if n == 1 else 'ées'}</span>
+              <span class="p-count">{n} entr{'y' if n == 1 else 'ies'}</span>
               {f'<span class="p-rx">💬 {total_rx} reactions</span>' if total_rx else ''}
               {buzz_badge}
             </div>
@@ -279,7 +279,7 @@ def generate_html(report: dict, bounty_id: int, output_path: str | Path | None =
           <td><a href="{_USER_BASE}/{html.escape(p.username)}" target="_blank">@{html.escape(p.username)}</a></td>
           <td>
             <div class="inline-bar" style="width:{bar_w}%"></div>
-            <span class="bar-num">{p.avg_tokens:.0f}</span>
+            <div class="bar-num">{p.avg_tokens:.0f}</div>
           </td>
           <td>{p.prompt_count}</td>
           <td class="tag-cell">{top_html}</td>
@@ -436,7 +436,7 @@ tr:hover td {{ background: #ffffff06; }}
 /* PROMPT ANALYSIS */
 .inline-bar {{ display: inline-block; height: 8px; background: linear-gradient(90deg,var(--accent2),var(--accent));
   border-radius: 4px; vertical-align: middle; margin-right: 6px; min-width: 2px; }}
-.bar-num {{ font-size: 0.8rem; color: var(--text); font-variant-numeric: tabular-nums; }}
+.bar-num {{ font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; margin-top: 3px; }}
 .tag-cell {{ max-width: 280px; }}
 .tag {{ display: inline-block; background: #818cf811; border: 1px solid #818cf833;
   border-radius: 6px; padding: 1px 7px; font-size: 0.72rem; color: var(--accent2);
@@ -469,7 +469,7 @@ tr:hover td {{ background: #ffffff06; }}
     &nbsp;·&nbsp; Bounty #{bounty_id}
     &nbsp;·&nbsp; <a href="{bounty_url}" target="_blank">civitai.red</a>
   </div>
-  {f'<div class="header-bene"><span class="header-bene-label">💰 Benefactors:</span> {bene_chips}</div>' if bene_chips else ''}
+  {f'<div class="header-bene"><span class="header-bene-label">💰 Creator:</span> {bene_chips}</div>' if bene_chips else ''}
 </div>
 
 <div class="stats-grid">
@@ -504,7 +504,7 @@ tr:hover td {{ background: #ffffff06; }}
 </div>
 
 
-<div class="section">
+<div class="section" style="margin-top:40px">
   <div class="section-title">Prompt analysis — {pr.total_images_with_prompt}/{pr.total_images} images with prompt</div>
   <div class="section" style="margin-bottom:14px">
     <div class="section-title" style="font-size:.85rem">Most used words (all users)</div>
@@ -533,7 +533,7 @@ tr:hover td {{ background: #ffffff06; }}
 </div>
 
 <div class="footer">
-  Generated {datetime.now().strftime("%Y-%m-%d %H:%M")} · civitai-python · bounty #{bounty_id}
+  Generated {datetime.now().strftime("%Y-%m-%d %H:%M")} · <a href="https://github.com/BetweenFloors/civit_bounties" target="_blank">civit_bounties</a> · bounty #{bounty_id}
 </div>
 </body>
 </html>"""
