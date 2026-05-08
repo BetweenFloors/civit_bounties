@@ -65,6 +65,10 @@ report = civ.bounties.full_report(12018)
 generate_html(report, 12018, "report.html")
 ```
 
+## How it works
+
+All processing runs locally. The CLI and server both make requests directly to `civitai.red` using your token — nothing goes through a third-party. The local server exists only to bypass browser CORS restrictions; the generated HTML is self-contained and never uploaded anywhere.
+
 ## Example report
 
 - [`examples/bounty_11729.html`](examples/bounty_11729.html) — 300+ entries, dark theme
