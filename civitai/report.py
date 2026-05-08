@@ -525,22 +525,36 @@ tr:hover td {{ background: #ffffff06; }}
     <div class="section-title" style="font-size:.85rem">Most used words (all users)</div>
     <div class="global-tags">{global_tags_html}</div>
   </div>
-  <table class="prompt-table">
-    <thead>
-      <tr>
-        <th>User</th>
-        <th>Avg tokens/prompt</th>
-        <th>Prompts</th>
-        <th>Top words</th>
-        <th>Exclusive words ✦</th>
-      </tr>
-    </thead>
-    <tbody>{prompt_rows}</tbody>
-  </table>
-  <div style="color:var(--muted);font-size:0.72rem;margin-top:8px">
-    ✦ Words found only in this user's prompts
+  <div class="section-title">Per-user breakdown</div>
+  <button class="timeline-btn" style="margin-bottom:12px" onclick="togglePromptTable()">📊 Show detail</button>
+  <div id="prompt-table-wrap" style="display:none">
+    <table class="prompt-table">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Avg tokens/prompt</th>
+          <th>Prompts</th>
+          <th>Top words</th>
+          <th>Exclusive words ✦</th>
+        </tr>
+      </thead>
+      <tbody>{prompt_rows}</tbody>
+    </table>
+    <div style="color:var(--muted);font-size:0.72rem;margin-top:8px">
+      ✦ Words found only in this user's prompts
+    </div>
   </div>
 </div>
+
+<script>
+function togglePromptTable() {{
+  const wrap = document.getElementById('prompt-table-wrap');
+  const btn = event.target;
+  const visible = wrap.style.display !== 'none';
+  wrap.style.display = visible ? 'none' : 'block';
+  btn.textContent = visible ? '📊 Show detail' : '📊 Hide detail';
+}}
+</script>
 
 <div class="section">
   <div class="section-title" style="display:flex;align-items:center;justify-content:space-between">
