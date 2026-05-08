@@ -32,7 +32,7 @@ Opens `http://localhost:8000` automatically. Enter your API token and bounty ID,
 
 > **⚠️ Note:** The report fetches every single entry, reaction, and prompt from the API. For large bounties (300+ entries) this can take 20–30 seconds. Don't close the tab while loading.
 
-![UI screenshot: dark form with token/bounty ID fields and theme selector]
+![UI form](assets/UI_form.png)
 
 ### CLI
 
@@ -84,3 +84,11 @@ All processing runs locally. The CLI and server both make requests directly to `
 | Reactions table | Who reacted, reaction type breakdown |
 | Prompt analysis | Avg token length per user, frequent words, exclusive vocabulary |
 | Participant cards | One card per user with all their image thumbnails and reactions |
+
+## Screenshots
+
+![Report — bounty details, daily chart, participants, winner](assets/UI_details.png)
+*bounty details, daily chart, participants, winner...*
+
+![Report — prompt analysis](assets/UI_prompts.png)
+*prompt analysis: average token count, top words, and exclusive vocabulary*
