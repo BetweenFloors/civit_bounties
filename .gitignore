@@ -5,4 +5,5 @@ dist/
 build/
 .env
 *.html
+!examples/*.html
 .DS_Store

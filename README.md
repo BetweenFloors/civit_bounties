@@ -65,6 +65,10 @@ report = civ.bounties.full_report(12018)
 generate_html(report, 12018, "report.html")
 ```
 
+## Example report
+
+A live example (300+ entries, dark theme) is available in [`examples/bounty_11729.html`](examples/bounty_11729.html).
+
 ## HTML report contents
 
 | Section | Description |
