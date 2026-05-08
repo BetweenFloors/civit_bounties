@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WeekEnd_Cats — Bounty Report</title>
+<style>
+:root, [data-theme="dark"] {
+  --bg: #0d0d1a;
+  --surface: #16213e;
+  --surface2: #1a1a2e;
+  --border: #2a2a4a;
+  --accent: #e879f9;
+  --accent2: #818cf8;
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --buzz: #facc15;
+  --r: 10px;
+}
+[data-theme="light"] {
+  --bg: #f1f5f9;
+  --surface: #ffffff;
+  --surface2: #f8fafc;
+  --border: #e2e8f0;
+  --accent: #9333ea;
+  --accent2: #6366f1;
+  --text: #1e293b;
+  --muted: #94a3b8;
+  --buzz: #b45309;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; padding: 20px 24px; max-width: 1400px; margin: 0 auto; }
+a { color: var(--accent2); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* HEADER */
+.page-header { background: linear-gradient(135deg,var(--surface),var(--surface2));
+  border: 1px solid var(--border); border-radius: var(--r); padding: 24px 28px; margin-bottom: 20px; }
+.page-header h1 { font-size: 1.7rem; }
+.page-header h1 a { color: var(--accent); }
+.expires-tag { display: inline-block; background: #7c3aed22; color: #a78bfa;
+  border: 1px solid #7c3aed55; border-radius: 20px; padding: 2px 10px;
+  font-size: 0.78rem; margin-left: 8px; vertical-align: middle; }
+.header-meta { color: var(--muted); font-size: 0.85rem; margin-top: 6px; }
+
+/* STATS GRID */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px,1fr));
+  gap: 12px; margin-bottom: 20px; }
+.stat { background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 14px 12px; text-align: center; }
+.stat-val { font-size: 1.9rem; font-weight: 700; color: var(--accent); line-height: 1; }
+.stat-val.buzz { color: var(--buzz); }
+.stat-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase;
+  letter-spacing: .05em; margin-top: 4px; }
+
+/* SECTIONS */
+.section { margin-bottom: 28px; }
+.section-title { font-size: 1rem; font-weight: 600; color: var(--accent2);
+  padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+
+/* CHART */
+.chart { display: flex; align-items: flex-end; gap: 8px; height: 130px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 14px; }
+.bar-group { flex: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 4px; height: 100%; justify-content: flex-end; }
+.bar { background: linear-gradient(180deg,var(--accent),var(--accent2));
+  width: 100%; border-radius: 4px 4px 0 0; display: flex;
+  align-items: flex-start; justify-content: center; min-height: 3px; }
+.bar-val { font-size: 0.65rem; font-weight: 700; color: #fff; padding: 2px 0; }
+.bar-label { font-size: 0.62rem; color: var(--muted); }
+
+/* TABLES */
+table { width: 100%; border-collapse: collapse; background: var(--surface);
+  border-radius: var(--r); overflow: hidden; border: 1px solid var(--border); }
+th { background: var(--surface2); color: var(--muted); font-size: 0.72rem;
+  text-transform: uppercase; letter-spacing: .05em; padding: 9px 14px; text-align: left; }
+td { padding: 9px 14px; border-top: 1px solid var(--border); font-size: 0.88rem; }
+.rank { color: var(--muted); }
+tr:hover td { background: #ffffff06; }
+
+/* REACTION SUMMARY BAR */
+.rx-summary { background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 12px 16px; font-size: 0.9rem;
+  color: var(--text); margin-bottom: 14px; }
+
+/* PARTICIPANT CARDS */
+.p-cards { display: flex; flex-direction: column; gap: 16px; }
+.p-card { background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); overflow: hidden; }
+.p-header { display: flex; align-items: center; gap: 14px; padding: 12px 16px;
+  background: var(--surface2); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.p-username { font-size: 1rem; font-weight: 700; color: var(--accent); }
+.p-meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.p-count { background: #818cf822; color: var(--accent2); border: 1px solid #818cf844;
+  border-radius: 12px; padding: 2px 9px; font-size: 0.75rem; }
+.p-rx { color: var(--muted); font-size: 0.8rem; }
+.p-buzz { background: #ca8a0422; color: var(--buzz); border: 1px solid #ca8a0444;
+  border-radius: 12px; padding: 2px 9px; font-size: 0.75rem; }
+
+/* THUMBNAIL STRIP */
+.p-thumbs { display: flex; flex-wrap: wrap; gap: 10px; padding: 12px; }
+.thumb { width: 200px; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; overflow: hidden; flex-shrink: 0;
+  transition: border-color .15s, transform .15s; }
+.thumb:hover { border-color: var(--accent2); transform: translateY(-2px); }
+.thumb-img { display: block; aspect-ratio: 1; overflow: hidden;
+  background: #0a0a1a; position: relative; }
+.thumb-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.no-img { display: flex; align-items: center; justify-content: center;
+  height: 100%; color: var(--muted); font-size: 0.8rem; }
+.awarded-badge { position: absolute; bottom: 6px; left: 6px;
+  background: #ca8a04cc; color: #fef08a; border-radius: 8px;
+  padding: 2px 7px; font-size: 0.7rem; font-weight: 700; }
+.thumb-desc { padding: 5px 8px 0; font-size: 0.72rem; color: var(--muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.thumb-foot { display: flex; justify-content: space-between; align-items: center;
+  padding: 4px 8px 7px; }
+.thumb-date { font-size: 0.68rem; color: var(--muted); }
+.thumb-rx { display: flex; gap: 4px; flex-wrap: wrap; }
+.rx-badge { font-size: 0.72rem; background: #ffffff0a; border: 1px solid var(--border);
+  border-radius: 10px; padding: 1px 6px; cursor: default; white-space: nowrap; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+.two-col .section { margin-bottom: 0; }
+
+/* WINNER */
+.winner-card { background: linear-gradient(135deg, #7c3aed22, #e879f911);
+  border: 1px solid #7c3aed66; border-radius: var(--r); padding: 16px; }
+.winner-header { font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: #a78bfa; margin-bottom: 12px; }
+.winner-user { font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; }
+.winner-user a { color: var(--accent); }
+.winner-desc { font-size: 0.85rem; color: var(--muted); margin-bottom: 8px;
+  font-style: italic; }
+.winner-buzz { font-size: 0.9rem; color: var(--buzz); font-weight: 600;
+  margin-bottom: 10px; }
+.winner-link { font-size: 0.8rem; color: var(--accent2); }
+
+/* PROMPT ANALYSIS */
+.inline-bar { display: inline-block; height: 8px; background: linear-gradient(90deg,var(--accent2),var(--accent));
+  border-radius: 4px; vertical-align: middle; margin-right: 6px; min-width: 2px; }
+.bar-num { font-size: 0.8rem; color: var(--text); font-variant-numeric: tabular-nums; }
+.tag-cell { max-width: 280px; }
+.tag { display: inline-block; background: #818cf811; border: 1px solid #818cf833;
+  border-radius: 6px; padding: 1px 7px; font-size: 0.72rem; color: var(--accent2);
+  margin: 2px 2px; white-space: nowrap; }
+.tag.excl { background: #e879f911; border-color: #e879f933; color: var(--accent); }
+.global-tags { background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 14px 16px; line-height: 2.2; }
+.prompt-table th:nth-child(2) { width: 160px; }
+.prompt-table th:nth-child(3) { width: 60px; }
+
+.header-bene { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.header-bene-label { font-size: 0.75rem; color: var(--muted); margin-right: 4px; }
+.bene-chip { background: #ca8a0418; border: 1px solid #ca8a0444; border-radius: 14px;
+  padding: 2px 10px; font-size: 0.78rem; color: var(--buzz); white-space: nowrap; }
+.bene-chip a { color: var(--buzz); }
+
+.footer { text-align: center; color: var(--muted); font-size: 0.72rem;
+  margin-top: 40px; padding-top: 14px; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>
+    <a href="https://civitai.red/bounties/11541" target="_blank">WeekEnd_Cats</a>
+    <span class="expires-tag">Ended</span>
+  </h1>
+  <div class="header-meta">
+    06 Mar 2026 → 09 Mar 2026
+    &nbsp;·&nbsp; Bounty #11541
+    &nbsp;·&nbsp; <a href="https://civitai.red/bounties/11541" target="_blank">civitai.red</a>
+  </div>
+  <div class="header-bene"><span class="header-bene-label">💰 Benefactors:</span> <span class="bene-chip"><a href="https://civitai.red/user/9263414" target="_blank">@9263414</a> · 1,000 Buzz</span></div>
+</div>
+
+<div class="stats-grid">
+  <div class="stat"><div class="stat-val">24</div><div class="stat-label">Entries</div></div>
+  <div class="stat"><div class="stat-val">24</div><div class="stat-label">Participants</div></div>
+  <div class="stat"><div class="stat-val buzz">1,000</div><div class="stat-label">Total Buzz</div></div>
+  <div class="stat"><div class="stat-val">51</div><div class="stat-label">Reactions</div></div>
+  <div class="stat"><div class="stat-val">8</div><div class="stat-label">Favorites</div></div>
+  <div class="stat"><div class="stat-val">4</div><div class="stat-label">Comments</div></div>
+</div>
+
+<div class="section">
+  <div class="section-title">Submissions per day</div>
+  <div class="chart">
+        <div class="bar-group">
+          <div class="bar" style="height:19%" title="2026-03-06: 3">
+            <span class="bar-val">3</span>
+          </div>
+          <div class="bar-label">03-06</div>
+        </div>
+        <div class="bar-group">
+          <div class="bar" style="height:31%" title="2026-03-07: 5">
+            <span class="bar-val">5</span>
+          </div>
+          <div class="bar-label">03-07</div>
+        </div>
+        <div class="bar-group">
+          <div class="bar" style="height:100%" title="2026-03-08: 16">
+            <span class="bar-val">16</span>
+          </div>
+          <div class="bar-label">03-08</div>
+        </div></div>
+</div>
+
+<div class="two-col">
+  <div class="section">
+    <div class="section-title">Participants (24) — entries</div>
+    <table>
+      <thead><tr><th>#</th><th>User</th><th>Entries</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="rank">#1</td>
+          <td><a href="https://civitai.red/user/angelomaiota" target="_blank">@angelomaiota</a></td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td class="rank">#2</td>
+          <td><a href="https://civitai.red/user/calonal" target="_blank">@calonal</a></td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td class="rank">#3</td>
+          <td><a href="https://civitai.red/user/Cinnafats" target="_blank">@Cinnafats</a></td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td class="rank">#4</td>
+          <td><a href="https://civitai.red/user/civitaigreeni4jbj605" target="_blank">@civitaigreeni4jbj605</a></td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td class="rank">#5</td>
+          <td><a href="https://civitai.red/user/CyberDanteInferno" target="_blank">@CyberDanteInferno</a></td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td class="rank">#6</td>
+          <td><a href="https://civitai.red/user/DougieA" target="_blank">@DougieA</a></td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td class="rank">#7</td>
+          <td><a href="https://civitai.red/user/ediestud69311" target="_blank">@ediestud69311</a></td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td class="rank">#8</td>
+          <td><a href="https://civitai.red/user/ignatrada864" target="_blank">@ignatrada864</a></td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td class="rank">#9</td>
+          <td><a href="https://civitai.red/user/JouTheChou" target="_blank">@JouTheChou</a></td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td class="rank">#10</td>
+          <td><a href="https://civitai.red/user/LaRoug3" target="_blank">@LaRoug3</a></td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td class="rank">#11</td>
+          <td><a href="https://civitai.red/user/marcovaralta79742" target="_blank">@marcovaralta79742</a></td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td class="rank">#12</td>
+          <td><a href="https://civitai.red/user/MScarlet1966" target="_blank">@MScarlet1966</a></td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td class="rank">#13</td>
+          <td><a href="https://civitai.red/user/mscarlet413" target="_blank">@mscarlet413</a></td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td class="rank">#14</td>
+          <td><a href="https://civitai.red/user/New_Aera" target="_blank">@New_Aera</a></td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td class="rank">#15</td>
+          <td><a href="https://civitai.red/user/nikoszlatanidis621" target="_blank">@nikoszlatanidis621</a></td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td class="rank">#16</td>
+          <td><a href="https://civitai.red/user/OceaneLer" target="_blank">@OceaneLer</a></td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td class="rank">#17</td>
+          <td><a href="https://civitai.red/user/SamMantos" target="_blank">@SamMantos</a></td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td class="rank">#18</td>
+          <td><a href="https://civitai.red/user/ScratchyStar" target="_blank">@ScratchyStar</a></td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td class="rank">#19</td>
+          <td><a href="https://civitai.red/user/Supalonely" target="_blank">@Supalonely</a></td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td class="rank">#20</td>
+          <td><a href="https://civitai.red/user/Takiyashamaru" target="_blank">@Takiyashamaru</a></td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td class="rank">#21</td>
+          <td><a href="https://civitai.red/user/tetsujingo8494" target="_blank">@tetsujingo8494</a></td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td class="rank">#22</td>
+          <td><a href="https://civitai.red/user/TiranTheTyrant" target="_blank">@TiranTheTyrant</a></td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td class="rank">#23</td>
+          <td><a href="https://civitai.red/user/Torak_the_Wolf" target="_blank">@Torak_the_Wolf</a></td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td class="rank">#24</td>
+          <td><a href="https://civitai.red/user/W20h" target="_blank">@W20h</a></td>
+          <td>1</td>
+        </tr></tbody>
+    </table>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:16px">
+    <div class="section" style="margin-bottom:0">
+      <div class="section-title">Reactions — 51 total</div>
+      <div class="rx-summary">👍 <strong>34</strong> Like &nbsp; ❤️ <strong>14</strong> Heart &nbsp; 😢 <strong>3</strong> Cry</div>
+    </div>
+    
+        <div class="winner-card">
+          <div class="winner-header">🏆 Winner</div>
+          <a href="https://civitai.red/bounties/11541/entries/250882" target="_blank"><img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/da90d395-79e3-4660-b466-8134c9b170f1/width=300/2026-03-08_114218_T2I_SDXL a Niji Seven_sdxlNijiSeven_REF_SHP_GRN_COL_UPm (Torak_the_Wolf).png" alt="winning entry" style="width:100%;border-radius:8px;display:block;margin-bottom:10px"></a>
+          <div class="winner-user">
+            <a href="https://civitai.red/user/Torak_the_Wolf" target="_blank">@Torak_the_Wolf</a>
+          </div>
+          <div class="winner-desc">A little illustration to soothe the heart.Have a beautiful day !</div>
+          <div class="winner-buzz">⚡ 1,000 Buzz</div>
+          <a href="https://civitai.red/bounties/11541/entries/250882" target="_blank" class="winner-link">View entry →</a>
+        </div>
+  </div>
+</div>
+
+
+<div class="section">
+  <div class="section-title">Prompt analysis — 38/41 images with prompt</div>
+  <div class="section" style="margin-bottom:14px">
+    <div class="section-title" style="font-size:.85rem">Most used words (all users)</div>
+    <div class="global-tags"><span class="tag" style="font-size:1.10rem">cryon_aesthetic <sup>27</sup></span> <span class="tag" style="font-size:1.07rem">white <sup>20</sup></span> <span class="tag" style="font-size:0.96rem">kitten <sup>14</sup></span> <span class="tag" style="font-size:0.94rem">black <sup>13</sup></span> <span class="tag" style="font-size:0.94rem">fluffy <sup>13</sup></span> <span class="tag" style="font-size:0.92rem">absurdres <sup>12</sup></span> <span class="tag" style="font-size:0.89rem">cute <sup>10</sup></span> <span class="tag" style="font-size:0.89rem">blue <sup>10</sup></span> <span class="tag" style="font-size:0.89rem">sitting <sup>10</sup></span> <span class="tag" style="font-size:0.89rem">looking <sup>10</sup></span> <span class="tag" style="font-size:0.89rem">viewer <sup>10</sup></span> <span class="tag" style="font-size:0.85rem">newest <sup>8</sup></span> <span class="tag" style="font-size:0.85rem">atmosphere <sup>8</sup></span> <span class="tag" style="font-size:0.85rem">cats <sup>8</sup></span> <span class="tag" style="font-size:0.83rem">warm <sup>7</sup></span></div>
+  </div>
+  <table class="prompt-table">
+    <thead>
+      <tr>
+        <th>User</th>
+        <th>Avg tokens/prompt</th>
+        <th>Prompts</th>
+        <th>Top words</th>
+        <th>Exclusive words ✦</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><a href="https://civitai.red/user/TiranTheTyrant" target="_blank">@TiranTheTyrant</a></td>
+          <td>
+            <div class="inline-bar" style="width:100%"></div>
+            <span class="bar-num">111</span>
+          </td>
+          <td>1</td>
+          <td class="tag-cell"><span class="tag">fluffy</span> <span class="tag">mushrooms</span> <span class="tag">black</span> <span class="tag">blurred</span> <span class="tag">kitten</span></td>
+          <td class="tag-cell"><span class="tag excl">mushrooms</span> <span class="tag excl">ears</span> <span class="tag excl">shiny</span> <span class="tag excl">grass</span> <span class="tag excl">tuft</span> <span class="tag excl">feral</span> <span class="tag excl">mouth</span> <span class="tag excl">giant</span></td>
+        </tr>
+        <tr>
+          <td><a href="https://civitai.red/user/Supalonely" target="_blank">@Supalonely</a></td>
+          <td>
+            <div class="inline-bar" style="width:69%"></div>
+            <span class="bar-num">77</span>
+          </td>
+          <td>2</td>
+          <td class="tag-cell"><span class="tag">aesthetic</span> <span class="tag">absurdres</span> <span class="tag">detail</span> <span class="tag">cryon_aesthetic</span> <span class="tag">surrounding</span></td>
+          <td class="tag-cell"><span class="tag excl">aimed</span> <span class="tag excl">ambient</span> <span class="tag excl">yellows</span> <span class="tag excl">water</span> <span class="tag excl">colorful</span> <span class="tag excl">across</span> <span class="tag excl">smo0thl1nes</span> <span class="tag excl">particles</span></td>
+        </tr>
+        <tr>
+          <td><a href="https://civitai.red/user/ignatrada864" target="_blank">@ignatrada864</a></td>
+          <td>
+            <div class="inline-bar" style="width:64%"></div>
+            <span class="bar-num">71</span>
+          </td>
+          <td>1</td>
+          <td class="tag-cell"><span class="tag">kitten</span> <span class="tag">toward</span> <span class="tag">camera</span> <span class="tag">close</span> <span class="tag">lens</span></td>
+          <td class="tag-cell"><span class="tag excl">toward</span> <span class="tag excl">adorable</span> <span class="tag excl">candid</span> <span class="tag excl">whiskers</span> <span class="tag excl">expression</span> <span class="tag excl">reaching</span> <span class="tag excl">perspective</span> <span class="tag excl">gesture</span></td>
+        </tr>
+        <tr>
+          <td><a href="https://civitai.red/user/SamMantos" target="_blank">@SamMantos</a></td>
+          <td>
+            <div class="inline-bar" style="width:53%"></div>
+            <span class="bar-num">59</span>
+          </td>
+          <td>4</td>
+          <td class="tag-cell"><span class="tag">white</span> <span class="tag">visible</span> <span class="tag">black</span> <span class="tag">cats</span> <span class="tag">slightly</span></td>
+          <td class="tag-cell"><span class="tag excl">visible</span> <span class="tag excl">pink</span> <span class="tag excl">edge</span> <span class="tag excl">bedspread</span> <span class="tag excl">while</span> <span class="tag excl">positioned</span> <span class="tag excl">concrete</span> <span class="tag excl">right</span></td>
+        </tr>
+        <tr>
+          <td><a href="https://civitai.red/user/MScarlet1966" target="_blank">@MScarlet1966</a></td>
+          <td>
+            <div class="inline-bar" style="width:48%"></div>
+            <span class="bar-num">53</span>
+          </td>
+          <td>1</td>
+          <td class="tag-cell"><span class="tag">owlets</span> <span class="tag">among</span> <span class="tag">hyperrealistic</span> <span class="tag">macro</span> <span class="tag">wildlife</span></td>
+          <td class="tag-cell"><span class="tag excl">among</span> <span class="tag excl">owlets</span> <span class="tag excl">nest</span> <span class="tag excl">through</span> <span class="tag excl">morning</span> <span class="tag excl">them</span> <span class="tag excl">that</span> <span class="tag excl">blending</span></td>
+        </tr>
+        <tr>
+          <td><a href="https://civitai.red/user/CyberDanteInferno" target="_blank">@CyberDanteInferno</a></td>
+          <td>
+            <div class="inline-bar" style="width:43%"></div>
+            <span class="bar-num">48</span>
+          </td>
+          <td>1</td>
+          <td class="tag-cell"><span class="tag">curtain</span> <span class="tag">looking</span> <span class="tag">white</span> <span class="tag">resolution</span> <span class="tag">angled</span></td>
+          <td class="tag-cell"><span class="tag excl">curtain</span> <span class="tag excl">behind</span> <span class="tag excl">heart</span> <span class="tag excl">adorable11</span> <span class="tag excl">back</span> <span class="tag excl">atmosphere13</span> <span class="tag excl">expression09</span> <span class="tag excl">cute12</span></td>
+        </tr>
+        <tr>
+          <td><a href="https://civitai.red/user/mscarlet413" target="_blank">@mscarlet413</a></td>
+          <td>
+            <div class="inline-bar" style="width:40%"></div>
+            <span class="bar-num">44</span>
+          </td>
+          <td>1</td>
+          <td class="tag-cell"><span class="tag">cryon_aesthetic</span> <span class="tag">butter-yellow</span> <span class="tag">cat13</span> <span class="tag">grumpy</span> <span class="tag">expression12</span></td>
+          <td class="tag-cell"><span class="tag excl">shading</span> <span class="tag excl">affection</span> <span class="tag excl">hues</span> <span class="tag excl">expression12</span> <span class="tag excl">lavender</span> <span class="tag excl">peach</span> <span class="tag excl">cat13</span> <span class="tag excl">belly11</span></td>
+        </tr>
+        <tr>
+          <td><a href="https://civitai.red/user/OceaneLer" target="_blank">@OceaneLer</a></td>
+          <td>
+            <div class="inline-bar" style="width:39%"></div>
+            <span class="bar-num">43</span>
+          </td>
+          <td>1</td>
+          <td class="tag-cell"><span class="tag">persian</span> <span class="tag">library</span> <span class="tag">portrait</span> <span class="tag">fluffy</span> <span class="tag">resting</span></td>
+          <td class="tag-cell"><span class="tag excl">library</span> <span class="tag excl">persian</span> <span class="tag excl">stormy</span> <span class="tag excl">expressive</span> <span class="tag excl">flashes</span> <span class="tag excl">victorian</span> <span class="tag excl">loraadd-detail-xl1</span> <span class="tag excl">storm</span></td>
+        </tr>
+        <tr>
+          <td><a href="https://civitai.red/user/JouTheChou" target="_blank">@JouTheChou</a></td>
+          <td>
+            <div class="inline-bar" style="width:35%"></div>
+            <span class="bar-num">39</span>
+          </td>
+          <td>1</td>
+          <td class="tag-cell"><span class="tag">white</span> <span class="tag">flat</span> <span class="tag">color</span> <span class="tag">1animal</span> <span class="tag">solo</span></td>
+          <td class="tag-cell"><span class="tag excl">wavy</span></td>
+        </tr>
+        <tr>
+          <td><a href="https://civitai.red/user/marcovaralta79742" target="_blank">@marcovaralta79742</a></td>
+          <td>
+            <div class="inline-bar" style="width:27%"></div>
+            <span class="bar-num">30</span>
+          </td>
+          <td>1</td>
+          <td class="tag-cell"><span class="tag">cats</span> <span class="tag">blanket</span> <span class="tag">european</span> <span class="tag">ultra-detailed</span> <span class="tag">absurdres</span></td>
+          <td class="tag-cell"><span class="tag excl">european</span> <span class="tag excl">christmas</span> <span class="tag excl">slim</span> <span class="tag excl">chaisslong</span> <span class="tag excl">adult</span> <span class="tag excl">reds</span></td>
+        </tr>
+        <tr>
+          <td><a href="https://civitai.red/user/ediestud69311" target="_blank">@ediestud69311</a></td>
+          <td>
+            <div class="inline-bar" style="width:26%"></div>
+            <span class="bar-num">29</span>
+          </td>
+          <td>1</td>
+          <td class="tag-cell"><span class="tag">good</span> <span class="tag">absurdres</span> <span class="tag">highres</span> <span class="tag">cryon_aesthetic</span> <span class="tag">newest</span></td>
+          <td class="tag-cell"><span class="tag excl">penetrating</span> <span class="tag excl">short</span> <span class="tag excl">scruffy</span> <span class="tag excl">elderly</span> <span class="tag excl">beard</span> <span class="tag excl">shoulder</span> <span class="tag excl">good</span> <span class="tag excl">whispy</span></td>
+        </tr>
+        <tr>
+          <td><a href="https://civitai.red/user/DougieA" target="_blank">@DougieA</a></td>
+          <td>
+            <div class="inline-bar" style="width:22%"></div>
+            <span class="bar-num">24</span>
+          </td>
+          <td>1</td>
+          <td class="tag-cell"><span class="tag">vibrant</span> <span class="tag">colors</span> <span class="tag">cryon_aesthetic</span> <span class="tag">pose</span> <span class="tag">angle</span></td>
+          <td class="tag-cell"><span class="tag excl">birman</span> <span class="tag excl">proud</span> <span class="tag excl">arrogant</span> <span class="tag excl">sakura</span> <span class="tag excl">patio</span> <span class="tag excl">loracryon_aesthetix10</span> <span class="tag excl">outdoors</span></td>
+        </tr>
+        <tr>
+          <td><a href="https://civitai.red/user/ScratchyStar" target="_blank">@ScratchyStar</a></td>
+          <td>
+            <div class="inline-bar" style="width:22%"></div>
+            <span class="bar-num">24</span>
+          </td>
+          <td>1</td>
+          <td class="tag-cell"><span class="tag">cryon_aesthetic</span> <span class="tag">fluffy</span> <span class="tag">orange</span> <span class="tag">sitting</span> <span class="tag">sunlit</span></td>
+          <td class="tag-cell"><span class="tag excl">strokes</span> <span class="tag excl">acrylic</span> <span class="tag excl">delicate</span> <span class="tag excl">windowsill</span> <span class="tag excl">brush</span></td>
+        </tr>
+        <tr>
+          <td><a href="https://civitai.red/user/calonal" target="_blank">@calonal</a></td>
+          <td>
+            <div class="inline-bar" style="width:22%"></div>
+            <span class="bar-num">24</span>
+          </td>
+          <td>1</td>
+          <td class="tag-cell"><span class="tag">1cat</span> <span class="tag">cryon_aesthetic</span> <span class="tag">loracryon_aesthetix1</span> <span class="tag">high-profile</span> <span class="tag">press</span></td>
+          <td class="tag-cell"><span class="tag excl">mode</span> <span class="tag excl">high-profile</span> <span class="tag excl">cameras</span> <span class="tag excl">multiple</span> <span class="tag excl">audience</span> <span class="tag excl">flashing</span> <span class="tag excl">announcement</span> <span class="tag excl">shooting</span></td>
+        </tr>
+        <tr>
+          <td><a href="https://civitai.red/user/nikoszlatanidis621" target="_blank">@nikoszlatanidis621</a></td>
+          <td>
+            <div class="inline-bar" style="width:22%"></div>
+            <span class="bar-num">24</span>
+          </td>
+          <td>1</td>
+          <td class="tag-cell"><span class="tag">cryon_aesthetic</span> <span class="tag">golden</span> <span class="tag">black</span> <span class="tag">blue</span> <span class="tag">sitting</span></td>
+          <td class="tag-cell"><span class="tag excl">ribbon</span> <span class="tag excl">shines</span> <span class="tag excl">bell</span></td>
+        </tr>
+        <tr>
+          <td><a href="https://civitai.red/user/New_Aera" target="_blank">@New_Aera</a></td>
+          <td>
+            <div class="inline-bar" style="width:21%"></div>
+            <span class="bar-num">23</span>
+          </td>
+          <td>3</td>
+          <td class="tag-cell"><span class="tag">portrait</span> <span class="tag">texture</span> <span class="tag">loracryonaesthetix08</span> <span class="tag">atmosphere</span> <span class="tag">maine</span></td>
+          <td class="tag-cell"><span class="tag excl">loracryonaesthetix08</span> <span class="tag excl">forest</span> <span class="tag excl">maine</span> <span class="tag excl">fairytale</span> <span class="tag excl">meadow</span> <span class="tag excl">ragdoll</span> <span class="tag excl">glowing</span> <span class="tag excl">loracryonaesthetix075</span></td>
+        </tr>
+        <tr>
+          <td><a href="https://civitai.red/user/tetsujingo8494" target="_blank">@tetsujingo8494</a></td>
+          <td>
+            <div class="inline-bar" style="width:20%"></div>
+            <span class="bar-num">22</span>
+          </td>
+          <td>1</td>
+          <td class="tag-cell"><span class="tag">masterpeice</span> <span class="tag">cute</span> <span class="tag">cryon_aesthetic</span> <span class="tag">hkmecha</span> <span class="tag">white</span></td>
+          <td class="tag-cell"><span class="tag excl">masterpeice</span> <span class="tag excl">ocean</span> <span class="tag excl">moon</span> <span class="tag excl">stance</span> <span class="tag excl">heaven</span> <span class="tag excl">view</span> <span class="tag excl">fight</span> <span class="tag excl">claws</span></td>
+        </tr>
+        <tr>
+          <td><a href="https://civitai.red/user/Cinnafats" target="_blank">@Cinnafats</a></td>
+          <td>
+            <div class="inline-bar" style="width:20%"></div>
+            <span class="bar-num">22</span>
+          </td>
+          <td>4</td>
+          <td class="tag-cell"><span class="tag">cryon_aesthetic</span> <span class="tag">looking</span> <span class="tag">viewer</span> <span class="tag">kitten</span> <span class="tag">tree</span></td>
+          <td class="tag-cell"><span class="tag excl">haired</span> <span class="tag excl">tree</span> <span class="tag excl">snow</span> <span class="tag excl">runner</span> <span class="tag excl">g30rg3b4rr3tsr</span> <span class="tag excl">impressionist</span> <span class="tag excl">candles</span> <span class="tag excl">mobe-godeen</span></td>
+        </tr>
+        <tr>
+          <td><a href="https://civitai.red/user/LaRoug3" target="_blank">@LaRoug3</a></td>
+          <td>
+            <div class="inline-bar" style="width:18%"></div>
+            <span class="bar-num">20</span>
+          </td>
+          <td>4</td>
+          <td class="tag-cell"><span class="tag">white</span> <span class="tag">sofa</span> <span class="tag">anime</span> <span class="tag">loracryon_aesthetix08</span> <span class="tag">cryon_aesthetic</span></td>
+          <td class="tag-cell"><span class="tag excl">loraillustrious_all_rated_v1065</span> <span class="tag excl">loraponyv5_noobv065s_1_adamw05</span> <span class="tag excl">lorareij-rt035</span> <span class="tag excl">loranyalia_noobxl06</span> <span class="tag excl">anime</span> <span class="tag excl">loracryon_aesthetix08</span> <span class="tag excl">milk</span> <span class="tag excl">holding</span></td>
+        </tr>
+        <tr>
+          <td><a href="https://civitai.red/user/civitaigreeni4jbj605" target="_blank">@civitaigreeni4jbj605</a></td>
+          <td>
+            <div class="inline-bar" style="width:16%"></div>
+            <span class="bar-num">18</span>
+          </td>
+          <td>1</td>
+          <td class="tag-cell"><span class="tag">happy</span> <span class="tag">grey</span> <span class="tag">brown</span> <span class="tag">kitten</span> <span class="tag">sitting</span></td>
+          <td class="tag-cell"><span class="tag excl">sits</span> <span class="tag excl">staring</span> <span class="tag excl">plaid</span></td>
+        </tr>
+        <tr>
+          <td><a href="https://civitai.red/user/Torak_the_Wolf" target="_blank">@Torak_the_Wolf</a></td>
+          <td>
+            <div class="inline-bar" style="width:15%"></div>
+            <span class="bar-num">17</span>
+          </td>
+          <td>1</td>
+          <td class="tag-cell"><span class="tag">illustriouslazypos</span> <span class="tag">cryon_aesthetic</span> <span class="tag">close</span> <span class="tag">shot</span> <span class="tag">little</span></td>
+          <td class="tag-cell"><span class="tag excl">catch</span> <span class="tag excl">illustriouslazypos</span> <span class="tag excl">nature</span> <span class="tag excl">raised</span> <span class="tag excl">trying</span> <span class="tag excl">butterfly</span> <span class="tag excl">baby</span> <span class="tag excl">lora-_sdxl_cryon_aesthetix08</span></td>
+        </tr>
+        <tr>
+          <td><a href="https://civitai.red/user/W20h" target="_blank">@W20h</a></td>
+          <td>
+            <div class="inline-bar" style="width:15%"></div>
+            <span class="bar-num">17</span>
+          </td>
+          <td>1</td>
+          <td class="tag-cell"><span class="tag">cats</span> <span class="tag">kittens</span> <span class="tag">ultra-detailed</span> <span class="tag">absurdres</span> <span class="tag">cryon_aesthetic</span></td>
+          <td class="tag-cell"><span class="tag excl">group</span></td>
+        </tr>
+        <tr>
+          <td><a href="https://civitai.red/user/Takiyashamaru" target="_blank">@Takiyashamaru</a></td>
+          <td>
+            <div class="inline-bar" style="width:12%"></div>
+            <span class="bar-num">13</span>
+          </td>
+          <td>4</td>
+          <td class="tag-cell"><span class="tag">newest</span> <span class="tag">absurdres</span> <span class="tag">highres</span> <span class="tag">cryon_aesthetic</span> <span class="tag">fisheye</span></td>
+          <td class="tag-cell"><span class="tag excl">fisheye</span> <span class="tag excl">rotary</span> <span class="tag excl">glass</span> <span class="tag excl">below</span> <span class="tag excl">gallop</span> <span class="tag excl">straight</span> <span class="tag excl">watercolor</span> <span class="tag excl">dash</span></td>
+        </tr></tbody>
+  </table>
+  <div style="color:var(--muted);font-size:0.72rem;margin-top:8px">
+    ✦ Words found only in this user's prompts
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Participants (24) — sorted by entry count</div>
+  <div class="p-cards">
+        <div class="p-card">
+          <div class="p-header">
+            <a href="https://civitai.red/user/angelomaiota" target="_blank" class="p-username">@angelomaiota</a>
+            <div class="p-meta">
+              <span class="p-count">1 entrée</span>
+              <span class="p-rx">💬 2 reactions</span>
+              
+            </div>
+          </div>
+          <div class="p-thumbs">
+    <div class="thumb">
+      <a href="https://civitai.red/bounties/11541/entries/250441" target="_blank" class="thumb-img">
+        <img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/ae076fe0-4ae1-4362-a095-462982120e0c/width=200/image.png" loading="lazy" alt="entry #250441">
+        
+      </a>
+      
+      <div class="thumb-foot">
+        <span class="thumb-date">06 Mar 2026</span>
+        <span class="thumb-rx"><span class="rx-badge" title="@angelomaiota">👍 1</span> <span class="rx-badge" title="@angelomaiota">❤️ 1</span></span>
+      </div>
+    </div></div>
+        </div>
+        <div class="p-card">
+          <div class="p-header">
+            <a href="https://civitai.red/user/calonal" target="_blank" class="p-username">@calonal</a>
+            <div class="p-meta">
+              <span class="p-count">1 entrée</span>
+              
+              
+            </div>
+          </div>
+          <div class="p-thumbs">
+    <div class="thumb">
+      <a href="https://civitai.red/bounties/11541/entries/250821" target="_blank" class="thumb-img">
+        <img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/a20d1a58-73b0-4b02-b2a2-a60ff8aaff55/width=200/20260307142955.jpg" loading="lazy" alt="entry #250821">
+        
+      </a>
+      
+      <div class="thumb-foot">
+        <span class="thumb-date">08 Mar 2026</span>
+        <span class="thumb-rx"></span>
+      </div>
+    </div></div>
+        </div>
+        <div class="p-card">
+          <div class="p-header">
+            <a href="https://civitai.red/user/Cinnafats" target="_blank" class="p-username">@Cinnafats</a>
+            <div class="p-meta">
+              <span class="p-count">1 entrée</span>
+              <span class="p-rx">💬 3 reactions</span>
+              
+            </div>
+          </div>
+          <div class="p-thumbs">
+    <div class="thumb">
+      <a href="https://civitai.red/bounties/11541/entries/250600" target="_blank" class="thumb-img">
+        <img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/73182e3e-b501-44d2-99c4-c65c6f72c5c1/width=200/KJM3BW5V1M8KDHXP2F4CEVARG0.jpeg" loading="lazy" alt="entry #250600">
+        
+      </a>
+      
+      <div class="thumb-foot">
+        <span class="thumb-date">07 Mar 2026</span>
+        <span class="thumb-rx"><span class="rx-badge" title="@civitaigreeni4jbj605, @9263414">👍 2</span> <span class="rx-badge" title="@9263414">❤️ 1</span></span>
+      </div>
+    </div></div>
+        </div>
+        <div class="p-card">
+          <div class="p-header">
+            <a href="https://civitai.red/user/civitaigreeni4jbj605" target="_blank" class="p-username">@civitaigreeni4jbj605</a>
+            <div class="p-meta">
+              <span class="p-count">1 entrée</span>
+              <span class="p-rx">💬 3 reactions</span>
+              
+            </div>
+          </div>
+          <div class="p-thumbs">
+    <div class="thumb">
+      <a href="https://civitai.red/bounties/11541/entries/250805" target="_blank" class="thumb-img">
+        <img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/ca280dd2-cbab-498c-bdaa-5fa001cd239a/width=200/KNJF7390Z1F4PR1Z2SM58DPBE0.jpeg" loading="lazy" alt="entry #250805">
+        
+      </a>
+      
+      <div class="thumb-foot">
+        <span class="thumb-date">08 Mar 2026</span>
+        <span class="thumb-rx"><span class="rx-badge" title="@civitaigreeni4jbj605, @9263414">👍 2</span> <span class="rx-badge" title="@9263414">❤️ 1</span></span>
+      </div>
+    </div></div>
+        </div>
+        <div class="p-card">
+          <div class="p-header">
+            <a href="https://civitai.red/user/CyberDanteInferno" target="_blank" class="p-username">@CyberDanteInferno</a>
+            <div class="p-meta">
+              <span class="p-count">1 entrée</span>
+              <span class="p-rx">💬 2 reactions</span>
+              
+            </div>
+          </div>
+          <div class="p-thumbs">
+    <div class="thumb">
+      <a href="https://civitai.red/bounties/11541/entries/250804" target="_blank" class="thumb-img">
+        <img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/13e7d4d8-4c6e-4cdf-abf6-82c6c9f49f3e/width=200/EA6704MGS71ECVK30K6KSE9130.jpeg" loading="lazy" alt="entry #250804">
+        
+      </a>
+      
+      <div class="thumb-foot">
+        <span class="thumb-date">08 Mar 2026</span>
+        <span class="thumb-rx"><span class="rx-badge" title="@9263414">👍 1</span> <span class="rx-badge" title="@9263414">❤️ 1</span></span>
+      </div>
+    </div></div>
+        </div>
+        <div class="p-card">
+          <div class="p-header">
+            <a href="https://civitai.red/user/DougieA" target="_blank" class="p-username">@DougieA</a>
+            <div class="p-meta">
+              <span class="p-count">1 entrée</span>
+              <span class="p-rx">💬 2 reactions</span>
+              
+            </div>
+          </div>
+          <div class="p-thumbs">
+    <div class="thumb">
+      <a href="https://civitai.red/bounties/11541/entries/251071" target="_blank" class="thumb-img">
+        <img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/06ec259d-2467-49f8-ada8-a972c549911d/width=200/20260308173714-animazingxl_v10-466160604913228.jpg" loading="lazy" alt="entry #251071">
+        
+      </a>
+      
+      <div class="thumb-foot">
+        <span class="thumb-date">08 Mar 2026</span>
+        <span class="thumb-rx"><span class="rx-badge" title="@civitaigreeni4jbj605, @9263414">👍 2</span></span>
+      </div>
+    </div></div>
+        </div>
+        <div class="p-card">
+          <div class="p-header">
+            <a href="https://civitai.red/user/ediestud69311" target="_blank" class="p-username">@ediestud69311</a>
+            <div class="p-meta">
+              <span class="p-count">1 entrée</span>
+              
+              
+            </div>
+          </div>
+          <div class="p-thumbs">
+    <div class="thumb">
+      <a href="https://civitai.red/bounties/11541/entries/251079" target="_blank" class="thumb-img">
+        <img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/d10d99d3-ccd2-40bc-9b39-13f84be11da5/width=200/ComfyUI_00033_.png" loading="lazy" alt="entry #251079">
+        
+      </a>
+      
+      <div class="thumb-foot">
+        <span class="thumb-date">08 Mar 2026</span>
+        <span class="thumb-rx"></span>
+      </div>
+    </div></div>
+        </div>
+        <div class="p-card">
+          <div class="p-header">
+            <a href="https://civitai.red/user/ignatrada864" target="_blank" class="p-username">@ignatrada864</a>
+            <div class="p-meta">
+              <span class="p-count">1 entrée</span>
+              <span class="p-rx">💬 2 reactions</span>
+              
+            </div>
+          </div>
+          <div class="p-thumbs">
+    <div class="thumb">
+      <a href="https://civitai.red/bounties/11541/entries/250831" target="_blank" class="thumb-img">
+        <img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/c62087ec-2fff-48b5-978a-16ac8fd577b7/width=200/MWE15G9CQ5HSC24K7E5TVKX250.jpeg" loading="lazy" alt="entry #250831">
+        
+      </a>
+      
+      <div class="thumb-foot">
+        <span class="thumb-date">08 Mar 2026</span>
+        <span class="thumb-rx"><span class="rx-badge" title="@TiranTheTyrant, @ignatrada864">👍 2</span></span>
+      </div>
+    </div></div>
+        </div>
+        <div class="p-card">
+          <div class="p-header">
+            <a href="https://civitai.red/user/JouTheChou" target="_blank" class="p-username">@JouTheChou</a>
+            <div class="p-meta">
+              <span class="p-count">1 entrée</span>
+              <span class="p-rx">💬 2 reactions</span>
+              
+            </div>
+          </div>
+          <div class="p-thumbs">
+    <div class="thumb">
+      <a href="https://civitai.red/bounties/11541/entries/250737" target="_blank" class="thumb-img">
+        <img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/848227ea-2f36-46a7-9a31-ea6f76834f6d/width=200/cat_b.jpg" loading="lazy" alt="entry #250737">
+        
+      </a>
+      
+      <div class="thumb-foot">
+        <span class="thumb-date">07 Mar 2026</span>
+        <span class="thumb-rx"><span class="rx-badge" title="@9263414">👍 1</span> <span class="rx-badge" title="@Supalonely">❤️ 1</span></span>
+      </div>
+    </div></div>
+        </div>
+        <div class="p-card">
+          <div class="p-header">
+            <a href="https://civitai.red/user/LaRoug3" target="_blank" class="p-username">@LaRoug3</a>
+            <div class="p-meta">
+              <span class="p-count">1 entrée</span>
+              <span class="p-rx">💬 4 reactions</span>
+              
+            </div>
+          </div>
+          <div class="p-thumbs">
+    <div class="thumb">
+      <a href="https://civitai.red/bounties/11541/entries/250917" target="_blank" class="thumb-img">
+        <img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/270f0e0a-cc41-4281-9e23-1f7abba840ea/width=200/1.png" loading="lazy" alt="entry #250917">
+        
+      </a>
+      <div class="thumb-desc" title="Entry - A little Mix of SDXL &amp;amp; Illustrious&quot;The Cryon cat of Illust &amp;amp; SDXL&quot;*I&#x27;ve been using SDXL lora on Illustrious a lot of time. &amp;amp; the lora seems to work fine on illust. Here is a version of mine with it. I use both version of checkpoint to test it.">Entry - A little Mix of SDXL &amp;amp; Illustrious&quot;The Cryon cat…</div>
+      <div class="thumb-foot">
+        <span class="thumb-date">08 Mar 2026</span>
+        <span class="thumb-rx"><span class="rx-badge" title="@Artikuz_Ai, @civitaigreeni4jbj605, @TiranTheTyrant, @9263414">👍 4</span></span>
+      </div>
+    </div></div>
+        </div>
+        <div class="p-card">
+          <div class="p-header">
+            <a href="https://civitai.red/user/marcovaralta79742" target="_blank" class="p-username">@marcovaralta79742</a>
+            <div class="p-meta">
+              <span class="p-count">1 entrée</span>
+              
+              
+            </div>
+          </div>
+          <div class="p-thumbs">
+    <div class="thumb">
+      <a href="https://civitai.red/bounties/11541/entries/250896" target="_blank" class="thumb-img">
+        <img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/41c045dd-6313-4ed8-8dc5-c2ba1eed7096/width=200/63c6c1be-aaee-4851-b6b4-399193aa8f7e.jpeg" loading="lazy" alt="entry #250896">
+        
+      </a>
+      <div class="thumb-desc" title="cats">cats</div>
+      <div class="thumb-foot">
+        <span class="thumb-date">08 Mar 2026</span>
+        <span class="thumb-rx"></span>
+      </div>
+    </div></div>
+        </div>
+        <div class="p-card">
+          <div class="p-header">
+            <a href="https://civitai.red/user/MScarlet1966" target="_blank" class="p-username">@MScarlet1966</a>
+            <div class="p-meta">
+              <span class="p-count">1 entrée</span>
+              
+              
+            </div>
+          </div>
+          <div class="p-thumbs">
+    <div class="thumb">
+      <a href="https://civitai.red/bounties/11541/entries/250747" target="_blank" class="thumb-img">
+        <img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/0682c62a-15b3-4c75-8678-0bbb377fbd20/width=200/KTZ98K4T05HM696CC3M976KHN0.jpeg" loading="lazy" alt="entry #250747">
+        
+      </a>
+      
+      <div class="thumb-foot">
+        <span class="thumb-date">07 Mar 2026</span>
+        <span class="thumb-rx"></span>
+      </div>
+    </div></div>
+        </div>
+        <div class="p-card">
+          <div class="p-header">
+            <a href="https://civitai.red/user/mscarlet413" target="_blank" class="p-username">@mscarlet413</a>
+            <div class="p-meta">
+              <span class="p-count">1 entrée</span>
+              <span class="p-rx">💬 4 reactions</span>
+              
+            </div>
+          </div>
+          <div class="p-thumbs">
+    <div class="thumb">
+      <a href="https://civitai.red/bounties/11541/entries/250973" target="_blank" class="thumb-img">
+        <img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/5e84d528-8e09-4a97-b7b4-d0b1b5ae0467/width=200/W106J0D1SB4ZVHN7N05K92JGT0.jpeg" loading="lazy" alt="entry #250973">
+        
+      </a>
+      
+      <div class="thumb-foot">
+        <span class="thumb-date">08 Mar 2026</span>
+        <span class="thumb-rx"><span class="rx-badge" title="@civitaigreeni4jbj605, @TiranTheTyrant, @9263414">👍 3</span> <span class="rx-badge" title="@9263414">❤️ 1</span></span>
+      </div>
+    </div></div>
+        </div>
+        <div class="p-card">
+          <div class="p-header">
+            <a href="https://civitai.red/user/New_Aera" target="_blank" class="p-username">@New_Aera</a>
+            <div class="p-meta">
+              <span class="p-count">1 entrée</span>
+              <span class="p-rx">💬 5 reactions</span>
+              
+            </div>
+          </div>
+          <div class="p-thumbs">
+    <div class="thumb">
+      <a href="https://civitai.red/bounties/11541/entries/250985" target="_blank" class="thumb-img">
+        <img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/e9dba79a-cc9c-4928-ae5e-72422a3fe017/width=200/2026-03-08T16.58.26_3.jpg" loading="lazy" alt="entry #250985">
+        
+      </a>
+      
+      <div class="thumb-foot">
+        <span class="thumb-date">08 Mar 2026</span>
+        <span class="thumb-rx"><span class="rx-badge" title="@civitaigreeni4jbj605, @TiranTheTyrant, @9263414">👍 3</span> <span class="rx-badge" title="@9263414">😢 1</span> <span class="rx-badge" title="@9263414">❤️ 1</span></span>
+      </div>
+    </div></div>
+        </div>
+        <div class="p-card">
+          <div class="p-header">
+            <a href="https://civitai.red/user/nikoszlatanidis621" target="_blank" class="p-username">@nikoszlatanidis621</a>
+            <div class="p-meta">
+              <span class="p-count">1 entrée</span>
+              <span class="p-rx">💬 2 reactions</span>
+              
+            </div>
+          </div>
+          <div class="p-thumbs">
+    <div class="thumb">
+      <a href="https://civitai.red/bounties/11541/entries/250626" target="_blank" class="thumb-img">
+        <img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/540a132d-f223-4c60-ad0a-14178adbad45/width=200/30255.jpg" loading="lazy" alt="entry #250626">
+        
+      </a>
+      
+      <div class="thumb-foot">
+        <span class="thumb-date">07 Mar 2026</span>
+        <span class="thumb-rx"><span class="rx-badge" title="@9263414">👍 1</span> <span class="rx-badge" title="@9263414">❤️ 1</span></span>
+      </div>
+    </div></div>
+        </div>
+        <div class="p-card">
+          <div class="p-header">
+            <a href="https://civitai.red/user/OceaneLer" target="_blank" class="p-username">@OceaneLer</a>
+            <div class="p-meta">
+              <span class="p-count">1 entrée</span>
+              <span class="p-rx">💬 2 reactions</span>
+              
+            </div>
+          </div>
+          <div class="p-thumbs">
+    <div class="thumb">
+      <a href="https://civitai.red/bounties/11541/entries/250524" target="_blank" class="thumb-img">
+        <img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/136345db-343b-4cf8-b2de-25e50fadc982/width=200/00006-871319891.png" loading="lazy" alt="entry #250524">
+        
+      </a>
+      
+      <div class="thumb-foot">
+        <span class="thumb-date">06 Mar 2026</span>
+        <span class="thumb-rx"><span class="rx-badge" title="@9263414">👍 1</span> <span class="rx-badge" title="@9263414">❤️ 1</span></span>
+      </div>
+    </div></div>
+        </div>
+        <div class="p-card">
+          <div class="p-header">
+            <a href="https://civitai.red/user/SamMantos" target="_blank" class="p-username">@SamMantos</a>
+            <div class="p-meta">
+              <span class="p-count">1 entrée</span>
+              
+              
+            </div>
+          </div>
+          <div class="p-thumbs">
+    <div class="thumb">
+      <a href="https://civitai.red/bounties/11541/entries/250913" target="_blank" class="thumb-img">
+        <img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/60d67375-d4cb-4faf-acae-846c8ff88a3a/width=200/2026-03-05 - %time% - try_00016_.png" loading="lazy" alt="entry #250913">
+        
+      </a>
+      
+      <div class="thumb-foot">
+        <span class="thumb-date">08 Mar 2026</span>
+        <span class="thumb-rx"></span>
+      </div>
+    </div></div>
+        </div>
+        <div class="p-card">
+          <div class="p-header">
+            <a href="https://civitai.red/user/ScratchyStar" target="_blank" class="p-username">@ScratchyStar</a>
+            <div class="p-meta">
+              <span class="p-count">1 entrée</span>
+              <span class="p-rx">💬 2 reactions</span>
+              
+            </div>
+          </div>
+          <div class="p-thumbs">
+    <div class="thumb">
+      <a href="https://civitai.red/bounties/11541/entries/250976" target="_blank" class="thumb-img">
+        <img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/d0e3bab8-e74b-4c96-8a03-8d9ebd46c97a/width=200/JWR3V42C215YRNXHAS1JYY2CY0.jpeg" loading="lazy" alt="entry #250976">
+        
+      </a>
+      <div class="thumb-desc" title="meooow :)">meooow :)</div>
+      <div class="thumb-foot">
+        <span class="thumb-date">08 Mar 2026</span>
+        <span class="thumb-rx"><span class="rx-badge" title="@9263414">👍 1</span> <span class="rx-badge" title="@9263414">❤️ 1</span></span>
+      </div>
+    </div></div>
+        </div>
+        <div class="p-card">
+          <div class="p-header">
+            <a href="https://civitai.red/user/Supalonely" target="_blank" class="p-username">@Supalonely</a>
+            <div class="p-meta">
+              <span class="p-count">1 entrée</span>
+              <span class="p-rx">💬 3 reactions</span>
+              
+            </div>
+          </div>
+          <div class="p-thumbs">
+    <div class="thumb">
+      <a href="https://civitai.red/bounties/11541/entries/250978" target="_blank" class="thumb-img">
+        <img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/5aec6565-79fa-449c-97f7-19b6212dde02/width=200//3HJ6JNTGK8VVHVR6ZM9KQTP7R0.jpeg?sig=CfDJ8N_qP_UguotCoWxV0GDJyrr-RxQHUnZfDKkWdR5aqXzGwZqy6n6lDCGFA88ktofiUEwGoK6VZaBlEaNVDvLr1c_miLhJmVfJvEtRNfe8oBXtpxbPxpL25gjQvBh7xpPLfqGQPyQznjNKdmDNEzavu5bL0JxDTUZ-gO78LaPuYK62ivAosrqmswWyJHrjEO0FNbwr86WPh84njhCSVCjxL9tf5dXSaqZuu61qYZdrEGTx9xZoAhjs6Ak1Bp58LWz28Ts6QAJ6BHq8v2l9nopODsieNFJH5oDlrq68PX_8wSHV&amp;exp=2027-03-08T16:23:15.7649550Z" loading="lazy" alt="entry #250978">
+        
+      </a>
+      
+      <div class="thumb-foot">
+        <span class="thumb-date">08 Mar 2026</span>
+        <span class="thumb-rx"><span class="rx-badge" title="@civitaigreeni4jbj605, @9263414">👍 2</span> <span class="rx-badge" title="@9263414">❤️ 1</span></span>
+      </div>
+    </div></div>
+        </div>
+        <div class="p-card">
+          <div class="p-header">
+            <a href="https://civitai.red/user/Takiyashamaru" target="_blank" class="p-username">@Takiyashamaru</a>
+            <div class="p-meta">
+              <span class="p-count">1 entrée</span>
+              <span class="p-rx">💬 2 reactions</span>
+              
+            </div>
+          </div>
+          <div class="p-thumbs">
+    <div class="thumb">
+      <a href="https://civitai.red/bounties/11541/entries/250437" target="_blank" class="thumb-img">
+        <img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/95a21c7f-a004-4138-9b72-1afa5ff7f1a7/width=200/2026-03-06T18.15.11_1.jpg" loading="lazy" alt="entry #250437">
+        
+      </a>
+      
+      <div class="thumb-foot">
+        <span class="thumb-date">06 Mar 2026</span>
+        <span class="thumb-rx"><span class="rx-badge" title="@9263414">👍 1</span> <span class="rx-badge" title="@9263414">❤️ 1</span></span>
+      </div>
+    </div></div>
+        </div>
+        <div class="p-card">
+          <div class="p-header">
+            <a href="https://civitai.red/user/tetsujingo8494" target="_blank" class="p-username">@tetsujingo8494</a>
+            <div class="p-meta">
+              <span class="p-count">1 entrée</span>
+              
+              
+            </div>
+          </div>
+          <div class="p-thumbs">
+    <div class="thumb">
+      <a href="https://civitai.red/bounties/11541/entries/251081" target="_blank" class="thumb-img">
+        <img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/a0a8de1d-3ce5-4efe-a6dc-7b8829e5f3bf/width=200/W4H4SGP1KGCAA234R45RAKFJY0.jpeg" loading="lazy" alt="entry #251081">
+        
+      </a>
+      <div class="thumb-desc" title="Cat Blanc in the moon ocean">Cat Blanc in the moon ocean</div>
+      <div class="thumb-foot">
+        <span class="thumb-date">08 Mar 2026</span>
+        <span class="thumb-rx"></span>
+      </div>
+    </div></div>
+        </div>
+        <div class="p-card">
+          <div class="p-header">
+            <a href="https://civitai.red/user/TiranTheTyrant" target="_blank" class="p-username">@TiranTheTyrant</a>
+            <div class="p-meta">
+              <span class="p-count">1 entrée</span>
+              <span class="p-rx">💬 5 reactions</span>
+              
+            </div>
+          </div>
+          <div class="p-thumbs">
+    <div class="thumb">
+      <a href="https://civitai.red/bounties/11541/entries/250918" target="_blank" class="thumb-img">
+        <img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/141f2a4a-402c-4b48-8416-f3b4b6f27ffc/width=200/2026-03-08T12.53.11_1.jpg" loading="lazy" alt="entry #250918">
+        
+      </a>
+      
+      <div class="thumb-foot">
+        <span class="thumb-date">08 Mar 2026</span>
+        <span class="thumb-rx"><span class="rx-badge" title="@Artikuz_Ai, @civitaigreeni4jbj605, @9263414">👍 3</span> <span class="rx-badge" title="@9263414">😢 1</span> <span class="rx-badge" title="@9263414">❤️ 1</span></span>
+      </div>
+    </div></div>
+        </div>
+        <div class="p-card">
+          <div class="p-header">
+            <a href="https://civitai.red/user/Torak_the_Wolf" target="_blank" class="p-username">@Torak_the_Wolf</a>
+            <div class="p-meta">
+              <span class="p-count">1 entrée</span>
+              <span class="p-rx">💬 5 reactions</span>
+              <span class="p-buzz">⚡ 1,000</span>
+            </div>
+          </div>
+          <div class="p-thumbs">
+    <div class="thumb">
+      <a href="https://civitai.red/bounties/11541/entries/250882" target="_blank" class="thumb-img">
+        <img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/da90d395-79e3-4660-b466-8134c9b170f1/width=200/2026-03-08_114218_T2I_SDXL a Niji Seven_sdxlNijiSeven_REF_SHP_GRN_COL_UPm (Torak_the_Wolf).png" loading="lazy" alt="entry #250882">
+        <div class="awarded-badge">⚡ 1,000 Buzz</div>
+      </a>
+      <div class="thumb-desc" title="A little illustration to soothe the heart.Have a beautiful day !">A little illustration to soothe the heart.Have a beautiful d…</div>
+      <div class="thumb-foot">
+        <span class="thumb-date">08 Mar 2026</span>
+        <span class="thumb-rx"><span class="rx-badge" title="@civitaigreeni4jbj605, @TiranTheTyrant, @9263414">👍 3</span> <span class="rx-badge" title="@9263414">😢 1</span> <span class="rx-badge" title="@9263414">❤️ 1</span></span>
+      </div>
+    </div></div>
+        </div>
+        <div class="p-card">
+          <div class="p-header">
+            <a href="https://civitai.red/user/W20h" target="_blank" class="p-username">@W20h</a>
+            <div class="p-meta">
+              <span class="p-count">1 entrée</span>
+              <span class="p-rx">💬 1 reactions</span>
+              
+            </div>
+          </div>
+          <div class="p-thumbs">
+    <div class="thumb">
+      <a href="https://civitai.red/bounties/11541/entries/250796" target="_blank" class="thumb-img">
+        <img src="https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/eefc25d0-38b7-4bdb-974e-d0a052816bde/width=200/ZZBT07X8GX28DXSW5WDBKZHDX0.jpeg" loading="lazy" alt="entry #250796">
+        
+      </a>
+      <div class="thumb-desc" title="kittens">kittens</div>
+      <div class="thumb-foot">
+        <span class="thumb-date">07 Mar 2026</span>
+        <span class="thumb-rx"><span class="rx-badge" title="@9263414">👍 1</span></span>
+      </div>
+    </div></div>
+        </div></div>
+</div>
+
+<div class="footer">
+  Generated 2026-05-09 00:52 · civitai-python · bounty #11541
+</div>
+</body>
+</html>

@@ -67,7 +67,8 @@ generate_html(report, 12018, "report.html")
 
 ## Example report
 
-A live example (300+ entries, dark theme) is available in [`examples/bounty_11729.html`](examples/bounty_11729.html).
+- [`examples/bounty_11729.html`](examples/bounty_11729.html) — 300+ entries, dark theme
+- [`examples/bounty_11541_light.html`](examples/bounty_11541_light.html) — light theme
 
 ## HTML report contents
 
