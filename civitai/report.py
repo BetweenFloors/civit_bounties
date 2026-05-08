@@ -72,14 +72,15 @@ def _reaction_badges(reactions: list[dict]) -> str:
     return " ".join(parts)
 
 
-def _entry_thumb(entry: dict, bounty_id: int, width: int = 200) -> str:
+def _entry_thumb(entry: dict, bounty_id: int, width: int = 200, username: str = "") -> str:
     """Small thumbnail card for use inside a participant card."""
     entry_id = entry.get("id", 0)
     images = entry.get("images") or []
     reactions = entry.get("_reactions") or []
     desc = entry.get("_description", "") or ""
     awarded = entry.get("awardedUnitAmountTotal", 0)
-    date = _fmt_date(entry.get("createdAt", ""))
+    created_at = entry.get("createdAt", "")
+    date = _fmt_date(created_at)
     entry_url = f"{_BOUNTY_BASE}/{bounty_id}/entries/{entry_id}"
 
     img_tag = ""
@@ -99,7 +100,6 @@ def _entry_thumb(entry: dict, bounty_id: int, width: int = 200) -> str:
         if awarded > 0 else ""
     )
 
-    # Strip HTML tags from description for display
     import re
     clean_desc = re.sub(r"<[^>]+>", "", desc).strip()
     desc_html = (
@@ -108,12 +108,19 @@ def _entry_thumb(entry: dict, bounty_id: int, width: int = 200) -> str:
         if clean_desc else ""
     )
 
+    user_label = (
+        f'<div class="thumb-user"><a href="{_USER_BASE}/{html.escape(username)}" '
+        f'target="_blank">@{html.escape(username)}</a></div>'
+        if username else ""
+    )
+
     return f"""
-    <div class="thumb">
+    <div class="thumb" data-date="{html.escape(created_at)}" data-user="{html.escape(username)}">
       <a href="{entry_url}" target="_blank" class="thumb-img">
         {img_tag}
         {awarded_badge}
       </a>
+      {user_label}
       {desc_html}
       <div class="thumb-foot">
         <span class="thumb-date">{date}</span>
@@ -199,7 +206,7 @@ def generate_html(report: dict, bounty_id: int, output_path: str | Path | None =
         user_url = f"{_USER_BASE}/{html.escape(username)}"
 
         thumbs = "\n".join(
-            _entry_thumb(e, bounty_id)
+            _entry_thumb(e, bounty_id, username=username)
             for e in sorted(p_entries, key=lambda x: x.get("createdAt", ""))
         )
 
@@ -415,6 +422,14 @@ tr:hover td {{ background: #ffffff06; }}
 .thumb-rx {{ display: flex; gap: 4px; flex-wrap: wrap; }}
 .rx-badge {{ font-size: 0.72rem; background: #ffffff0a; border: 1px solid var(--border);
   border-radius: 10px; padding: 1px 6px; cursor: default; white-space: nowrap; }}
+.thumb-user {{ font-size: 0.72rem; font-weight: 600; padding: 5px 8px 0; display: none; }}
+.thumb-user a {{ color: var(--accent2); }}
+
+#timeline-grid {{ flex-wrap: wrap; gap: 10px; }}
+.timeline-btn {{ background: var(--btn,#7c3aed); border: none;
+  border-radius: 8px; color: #fff; cursor: pointer; padding: 6px 14px;
+  font-size: 0.82rem; font-weight: 600; transition: opacity .15s; }}
+.timeline-btn:hover {{ opacity: .85; }}
 
 .two-col {{ display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }}
 @media (max-width: 700px) {{ .two-col {{ grid-template-columns: 1fr; }} }}
@@ -528,9 +543,45 @@ tr:hover td {{ background: #ffffff06; }}
 </div>
 
 <div class="section">
-  <div class="section-title">Participants ({len(sorted_participants)}) — sorted by entry count</div>
-  <div class="p-cards">{participant_cards}</div>
+  <div class="section-title" style="display:flex;align-items:center;justify-content:space-between">
+    <span id="participants-title">Participants ({len(sorted_participants)}) — sorted by entry count</span>
+    <button class="timeline-btn" id="timeline-btn" onclick="toggleTimeline()">🕐 Timeline view</button>
+  </div>
+  <div id="participant-cards" class="p-cards">{participant_cards}</div>
+  <div id="timeline-grid" style="display:none"></div>
 </div>
+
+<script>
+function toggleTimeline() {{
+  const cards = document.getElementById('participant-cards');
+  const grid = document.getElementById('timeline-grid');
+  const btn = document.getElementById('timeline-btn');
+  const title = document.getElementById('participants-title');
+  const isTimeline = grid.style.display !== 'none';
+
+  if (isTimeline) {{
+    cards.style.display = 'flex';
+    grid.style.display = 'none';
+    btn.textContent = '🕐 Timeline view';
+    title.textContent = 'Participants ({len(sorted_participants)}) — sorted by entry count';
+  }} else {{
+    if (!grid.dataset.built) {{
+      const thumbs = Array.from(document.querySelectorAll('#participant-cards .thumb'));
+      thumbs.sort((a, b) => (a.dataset.date || '').localeCompare(b.dataset.date || ''));
+      thumbs.forEach(t => {{
+        const clone = t.cloneNode(true);
+        clone.querySelector('.thumb-user').style.display = 'block';
+        grid.appendChild(clone);
+      }});
+      grid.dataset.built = '1';
+    }}
+    cards.style.display = 'none';
+    grid.style.display = 'flex';
+    btn.textContent = '👥 By participant';
+    title.textContent = 'All entries — chronological';
+  }}
+}}
+</script>
 
 <div class="footer">
   Generated {datetime.now().strftime("%Y-%m-%d %H:%M")} · <a href="https://github.com/BetweenFloors/civit_bounties" target="_blank">civit_bounties</a> · bounty #{bounty_id}
