@@ -43,7 +43,8 @@ def cmd_bounty(args: argparse.Namespace) -> None:
     print(_fmt("Entries:", s.entries))
     print(_fmt("Participants:", len({e.user for e in entries})))
     print(_fmt("Benefactors:", s.benefactors))
-    print(_fmt("Favorites:", s.favorites))
+    print(_fmt("Likes:", s.likes))
+    print(_fmt("Tracking:", s.tracking))
     print(_fmt("Comments:", s.comments))
 
     if benefactors:
@@ -56,7 +57,7 @@ def cmd_bounty(args: argparse.Namespace) -> None:
     counts = Counter(e.user for e in entries)
     print(f"\n--- Top participants ---")
     for user, n in counts.most_common(10):
-        print(f"  {user:<30} {n} entr{'ée' if n == 1 else 'ées'}")
+        print(f"  {user:<30} {n} entr{'y' if n == 1 else 'ies'}")
 
     # --- HTML output --------------------------------------------------
     if args.html is not False:
