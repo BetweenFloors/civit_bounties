@@ -21,7 +21,8 @@ class BountyStats:
     entries: int
     benefactors: int
     total_buzz: int
-    favorites: int
+    likes: int
+    tracking: int
     comments: int
     starts_at: str
     expires_at: str
@@ -207,7 +208,8 @@ class BountyAPI:
             entries=stats.get("entryCountAllTime", 0),
             benefactors=stats.get("benefactorCountAllTime", 0),
             total_buzz=stats.get("unitAmountCountAllTime", 0),
-            favorites=stats.get("favoriteCountAllTime", 0),
+            likes=stats.get("favoriteCountAllTime", 0),
+            tracking=stats.get("trackCountAllTime", 0),
             comments=stats.get("commentCountAllTime", 0),
             starts_at=data.get("startsAt", ""),
             expires_at=data.get("expiresAt", ""),

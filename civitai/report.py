@@ -492,7 +492,8 @@ tr:hover td {{ background: #ffffff06; }}
   <div class="stat"><div class="stat-val">{len(sorted_participants)}</div><div class="stat-label">Participants</div></div>
   <div class="stat"><div class="stat-val buzz">{stats.total_buzz:,}</div><div class="stat-label">Total Buzz</div></div>
   <div class="stat"><div class="stat-val">{sum(reaction_type_counts.values())}</div><div class="stat-label">Reactions</div></div>
-  <div class="stat"><div class="stat-val">{stats.favorites}</div><div class="stat-label">Favorites</div></div>
+  <div class="stat"><div class="stat-val">{stats.likes}</div><div class="stat-label">Likes</div></div>
+  <div class="stat"><div class="stat-val">{stats.tracking}</div><div class="stat-label">Tracking</div></div>
   <div class="stat"><div class="stat-val">{stats.comments}</div><div class="stat-label">Comments</div></div>
 </div>
 
