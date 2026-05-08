@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "civitai-bounty"
+version = "0.1.0"
+description = "Python client for Civitai bounty statistics and HTML reports"
+requires-python = ">=3.10"
+dependencies = ["requests>=2.28"]
+
+[project.scripts]
+civitai = "civitai.cli:main"
+civitai-server = "civitai.server:main"
