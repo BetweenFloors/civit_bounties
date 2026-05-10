@@ -130,10 +130,12 @@ def _entry_thumb(entry: dict, bounty_id: int, width: int = 200, username: str = 
           data-id="{entry_id}" oninput="saveScore(this)" title="Score (0–100)">
         <button class="star-btn" onclick="toggleStar(this)" title="Highlight this entry">☆</button>
       </div>
+      <input type="text" class="comment-input" placeholder="note…"
+        data-id="{entry_id}" oninput="saveComment(this)">
     </div>"""
 
 
-def generate_html(report: dict, bounty_id: int, output_path: str | Path | None = None, theme: str = "dark", saved_scores: dict | None = None, saved_highlights: list | None = None, server_url: str = "") -> str:
+def generate_html(report: dict, bounty_id: int, output_path: str | Path | None = None, theme: str = "dark", saved_scores: dict | None = None, saved_highlights: list | None = None, saved_comments: dict | None = None, server_url: str = "") -> str:
     stats = report["stats"]
     entries = report["entries"]
     benefactors = report["benefactors"]
@@ -143,6 +145,7 @@ def generate_html(report: dict, bounty_id: int, output_path: str | Path | None =
     bounty_url = f"{_BOUNTY_BASE}/{bounty_id}"
     expires_label = _days_left(stats.expires_at)
     saved_scores_json = json.dumps(saved_scores or {})
+    saved_comments_json = json.dumps(saved_comments or {})
     saved_highlights_json = json.dumps(saved_highlights or [])
 
     # --- Group entries by participant -----------------------------------
@@ -407,7 +410,7 @@ tr:hover td {{ background: #ffffff06; }}
   border-radius: 12px; padding: 2px 9px; font-size: 0.75rem; }}
 
 /* THUMBNAIL STRIP */
-.p-thumbs {{ display: flex; flex-wrap: wrap; gap: 10px; padding: 12px; }}
+.p-thumbs {{ display: flex; flex-wrap: wrap; gap: 10px; padding: 12px; justify-content: center; }}
 .thumb {{ width: 200px; background: var(--surface2); border: 1px solid var(--border);
   border-radius: 8px; overflow: hidden; flex-shrink: 0;
   transition: border-color .15s, transform .15s; }}
@@ -431,7 +434,7 @@ tr:hover td {{ background: #ffffff06; }}
 .thumb-user {{ font-size: 0.72rem; font-weight: 600; padding: 5px 8px 0; display: none; }}
 .thumb-user a {{ color: var(--accent2); }}
 
-#timeline-grid {{ flex-wrap: wrap; gap: 10px; }}
+#timeline-grid {{ flex-wrap: wrap; gap: 10px; justify-content: center; }}
 .timeline-btn {{ background: var(--btn,#7c3aed); border: none;
   border-radius: 8px; color: #fff; cursor: pointer; padding: 6px 14px;
   font-size: 0.82rem; font-weight: 600; transition: opacity .15s; }}
@@ -482,6 +485,11 @@ tr:hover td {{ background: #ffffff06; }}
   color: var(--muted); padding: 0 2px; line-height: 1; transition: color .15s, transform .1s; }}
 .star-btn:hover {{ color: gold; transform: scale(1.2); }}
 .thumb.highlighted .star-btn {{ color: gold; }}
+.comment-input {{ width: calc(100% - 16px); margin: 4px 8px 8px; background: none;
+  border: none; border-top: 1px solid var(--border); color: var(--muted);
+  font-size: 0.72rem; padding: 5px 2px; outline: none; }}
+.comment-input:focus {{ color: var(--text); }}
+.comment-input:not(:placeholder-shown) {{ color: var(--text); }}
 .score-input {{ width: 46px; background: none; border: 1px solid var(--border);
   border-radius: 5px; color: var(--muted); font-size: 0.72rem; padding: 2px 4px;
   text-align: center; margin-left: auto; transition: border-color .15s, color .15s; }}
@@ -489,7 +497,7 @@ tr:hover td {{ background: #ffffff06; }}
 .score-input:not(:placeholder-shown) {{ color: var(--accent); font-weight: 700; border-color: var(--accent); }}
 .score-view-section {{ margin-bottom: 32px; }}
 .score-view-section .section-title {{ margin-bottom: 12px; }}
-.score-view-grid {{ display: flex; flex-wrap: wrap; gap: 10px; }}
+.score-view-grid {{ display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }}
 .score-badge {{ position: absolute; top: 6px; left: 6px; background: var(--accent);
   color: #fff; font-size: 0.72rem; font-weight: 700; border-radius: 6px;
   padding: 2px 7px; pointer-events: none; }}
@@ -566,11 +574,16 @@ tr:hover td {{ background: #ffffff06; }}
 
 <div class="two-col">
   <div class="section">
-    <div class="section-title">Participants ({len(sorted_participants)}) — entries</div>
-    <table>
-      <thead><tr><th>#</th><th>User</th><th>Entries</th></tr></thead>
-      <tbody>{top_participants_rows}</tbody>
-    </table>
+    <div class="section-title" style="display:flex;align-items:center;justify-content:space-between">
+      <span>Participants ({len(sorted_participants)}) — entries</span>
+      <button class="timeline-btn" id="ptable-toggle-btn" onclick="toggleParticipantTable()">👁 Show</button>
+    </div>
+    <div id="participant-table-wrap" style="display:none">
+      <table>
+        <thead><tr><th>#</th><th>User</th><th>Entries</th></tr></thead>
+        <tbody>{top_participants_rows}</tbody>
+      </table>
+    </div>
   </div>
   <div style="display:flex;flex-direction:column;gap:16px">
     <div class="section" style="margin-bottom:0">
@@ -671,6 +684,7 @@ function toggleTimeline() {{
 
 <script>
 const _SCORE_NS = 'civit_score_{bounty_id}_';
+const _COMMENT_NS = 'civit_comment_{bounty_id}_';
 const _TOAST_KEY = 'civit_save_warned_{bounty_id}';
 let _toastShown = false;
 function showSaveToast() {{
@@ -683,7 +697,18 @@ function dismissToast() {{
   document.getElementById('save-toast').classList.remove('show');
 }}
 const _SAVED_SCORES = {saved_scores_json};
+const _SAVED_COMMENTS = {saved_comments_json};
 const _SAVED_HIGHLIGHTS = {saved_highlights_json};
+
+function saveComment(input) {{
+  showSaveToast();
+  const key = _COMMENT_NS + input.dataset.id;
+  if (input.value.trim() === '') localStorage.removeItem(key);
+  else localStorage.setItem(key, input.value);
+  document.querySelectorAll(`.comment-input[data-id="${{input.dataset.id}}"]`).forEach(el => {{
+    if (el !== input) el.value = input.value;
+  }});
+}}
 
 function saveScore(input) {{
   showSaveToast();
@@ -703,6 +728,12 @@ function loadScores() {{
     const saved = _SAVED_SCORES[input.dataset.id];
     if (saved !== undefined) {{ input.value = saved; localStorage.setItem(_SCORE_NS + input.dataset.id, saved); }}
   }});
+  document.querySelectorAll('.comment-input').forEach(input => {{
+    const lsVal = localStorage.getItem(_COMMENT_NS + input.dataset.id);
+    if (lsVal !== null) {{ input.value = lsVal; return; }}
+    const saved = _SAVED_COMMENTS[input.dataset.id];
+    if (saved !== undefined) {{ input.value = saved; localStorage.setItem(_COMMENT_NS + input.dataset.id, saved); }}
+  }});
   if (_SAVED_HIGHLIGHTS.length) {{
     document.querySelectorAll('.thumb[data-url]').forEach(t => {{
       const match = _SAVED_HIGHLIGHTS.includes(t.dataset.url);
@@ -721,6 +752,10 @@ async function saveScoresToServer() {{
     const v = input.value.trim();
     if (v !== '') scores[input.dataset.id] = parseInt(v);
   }});
+  const comments = {{}};
+  document.querySelectorAll('#participant-cards .comment-input').forEach(input => {{
+    if (input.value.trim() !== '') comments[input.dataset.id] = input.value.trim();
+  }});
   const highlights = Array.from(document.querySelectorAll('#participant-cards .thumb.highlighted[data-url]'))
     .map(t => t.dataset.url)
     .filter((u, i, a) => a.indexOf(u) === i);
@@ -731,7 +766,7 @@ async function saveScoresToServer() {{
     await fetch('{server_url}/save-scores', {{
       method: 'POST',
       headers: {{'Content-Type': 'application/json'}},
-      body: JSON.stringify({{bounty_id: {bounty_id}, scores, highlights}}),
+      body: JSON.stringify({{bounty_id: {bounty_id}, scores, comments, highlights}}),
     }});
     btn.textContent = '✓ Saved';
     setTimeout(() => {{ btn.textContent = '💾 Save scores'; btn.disabled = false; }}, 2000);
@@ -788,18 +823,29 @@ function resetScores() {{
   document.getElementById('score-view-btn').click();
 }}
 
-let _zoom = false;
+const _ZOOM_STATES = [
+  {{ label: '⊞ Wide thumbnails', width: null }},
+  {{ label: '⊟ Extra-wide thumbnails', width: '300px' }},
+  {{ label: '⊠ Normal thumbnails', width: '450px' }},
+];
+let _zoomIdx = 0;
 function toggleZoom() {{
-  _zoom = !_zoom;
-  const btn = document.getElementById('zoom-btn');
-  btn.textContent = _zoom ? '⊟ Normal thumbnails' : '⊞ Wide thumbnails';
+  _zoomIdx = (_zoomIdx + 1) % _ZOOM_STATES.length;
+  const state = _ZOOM_STATES[_zoomIdx];
+  document.getElementById('zoom-btn').textContent = state.label;
   const style = document.getElementById('zoom-style') || (() => {{
-    const s = document.createElement('style');
-    s.id = 'zoom-style';
-    document.head.appendChild(s);
-    return s;
+    const s = document.createElement('style'); s.id = 'zoom-style';
+    document.head.appendChild(s); return s;
   }})();
-  style.textContent = _zoom ? '.thumb {{ width: 300px !important; }}' : '';
+  style.textContent = state.width ? `.thumb {{ width: ${{state.width}} !important; }}` : '';
+}}
+
+function toggleParticipantTable() {{
+  const wrap = document.getElementById('participant-table-wrap');
+  const btn = document.getElementById('ptable-toggle-btn');
+  const visible = wrap.style.display !== 'none';
+  wrap.style.display = visible ? 'none' : 'block';
+  btn.textContent = visible ? '👁 Show' : '🙈 Hide';
 }}
 
 let _hlOnly = false;

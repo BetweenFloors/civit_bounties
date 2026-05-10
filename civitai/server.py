@@ -245,9 +245,10 @@ class _Handler(BaseHTTPRequestHandler):
                 payload = json.loads(body)
                 bounty_id = int(payload["bounty_id"])
                 scores = payload.get("scores", {})
+                comments = payload.get("comments", {})
                 highlights = payload.get("highlights", [])
                 _EXPORT_DIR.mkdir(exist_ok=True)
-                (_EXPORT_DIR / f"{bounty_id}.json").write_text(json.dumps({"scores": scores, "highlights": highlights}))
+                (_EXPORT_DIR / f"{bounty_id}.json").write_text(json.dumps({"scores": scores, "comments": comments, "highlights": highlights}))
                 self._json(200, {"ok": True})
             except Exception:
                 self._json(500, {"error": traceback.format_exc().splitlines()[-1]})
@@ -266,12 +267,13 @@ class _Handler(BaseHTTPRequestHandler):
             scores_path = _EXPORT_DIR / f"{bounty_id}.json"
             saved = json.loads(scores_path.read_text()) if scores_path.exists() else {}
             saved_scores = saved.get("scores", saved) if isinstance(saved, dict) else {}
+            saved_comments = saved.get("comments", {}) if isinstance(saved, dict) else {}
             saved_highlights = saved.get("highlights", []) if isinstance(saved, dict) else []
 
             civ = Civitai(api_token=token or None)
             report = civ.bounties.full_report(bounty_id)
             server_url = f"http://localhost:{self.server.server_address[1]}"
-            html_out = generate_html(report, bounty_id, theme=theme, saved_scores=saved_scores, saved_highlights=saved_highlights, server_url=server_url)
+            html_out = generate_html(report, bounty_id, theme=theme, saved_scores=saved_scores, saved_comments=saved_comments, saved_highlights=saved_highlights, server_url=server_url)
 
             self._json(200, {"html": html_out})
 
