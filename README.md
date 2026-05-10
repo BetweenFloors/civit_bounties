@@ -65,6 +65,29 @@ report = civ.bounties.full_report(12018)
 generate_html(report, 12018, "report.html")
 ```
 
+## Interactive features (report UI)
+
+Once a report is open, several tools are available for bounty organizers:
+
+### ★ Highlights
+Mark entries of interest directly on their thumbnail using the **★** button, or paste a list of entry URLs into the **🔖 Highlight entries** modal (one URL per line — any text after the URL is ignored). Opening the modal always pre-fills with currently highlighted entries, so you can combine both methods freely.
+
+Use **★ Highlights only** (next to "🕐 Timeline view") to hide all non-highlighted entries. Works in both participant view and timeline view.
+
+### 🏅 Scores
+Each thumbnail has a small score field (0–100). Fill in scores directly on the cards. Click **🏅 Sort by score** to open a ranked view of all scored entries, sorted highest first. A **Reset scores** button is available inside that view.
+
+### 💾 Saving
+Scores and highlights are **not saved automatically**. Click **💾 Save scores & highlights** to persist everything. Data is written to:
+
+```
+export/{bounty_id}.json
+```
+
+This file is loaded automatically the next time you generate a report for the same bounty — scores and highlights are restored without any extra steps.
+
+> **Note:** The `export/` folder is local only and excluded from git.
+
 ## How it works
 
 All processing runs locally. The CLI and server both make requests directly to `civitai.red` using your token — nothing goes through a third-party. The local server exists only to bypass browser CORS restrictions; the generated HTML is self-contained and never uploaded anywhere.

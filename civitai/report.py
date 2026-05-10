@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import html
+import json
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -115,7 +116,7 @@ def _entry_thumb(entry: dict, bounty_id: int, width: int = 200, username: str = 
     )
 
     return f"""
-    <div class="thumb" data-date="{html.escape(created_at)}" data-user="{html.escape(username)}">
+    <div class="thumb" data-date="{html.escape(created_at)}" data-user="{html.escape(username)}" data-url="{html.escape(entry_url)}" data-entry-id="{entry_id}">
       <a href="{entry_url}" target="_blank" class="thumb-img">
         {img_tag}
         {awarded_badge}
@@ -125,11 +126,14 @@ def _entry_thumb(entry: dict, bounty_id: int, width: int = 200, username: str = 
       <div class="thumb-foot">
         <span class="thumb-date">{date}</span>
         <span class="thumb-rx">{rx_html}</span>
+        <input type="number" class="score-input" min="0" max="100" placeholder="—"
+          data-id="{entry_id}" oninput="saveScore(this)" title="Score (0–100)">
+        <button class="star-btn" onclick="toggleStar(this)" title="Highlight this entry">☆</button>
       </div>
     </div>"""
 
 
-def generate_html(report: dict, bounty_id: int, output_path: str | Path | None = None, theme: str = "dark") -> str:
+def generate_html(report: dict, bounty_id: int, output_path: str | Path | None = None, theme: str = "dark", saved_scores: dict | None = None, saved_highlights: list | None = None, server_url: str = "") -> str:
     stats = report["stats"]
     entries = report["entries"]
     benefactors = report["benefactors"]
@@ -138,6 +142,8 @@ def generate_html(report: dict, bounty_id: int, output_path: str | Path | None =
     bounty_name = html.escape(stats.name)
     bounty_url = f"{_BOUNTY_BASE}/{bounty_id}"
     expires_label = _days_left(stats.expires_at)
+    saved_scores_json = json.dumps(saved_scores or {})
+    saved_highlights_json = json.dumps(saved_highlights or [])
 
     # --- Group entries by participant -----------------------------------
     by_participant: dict[str, list[dict]] = defaultdict(list)
@@ -470,6 +476,62 @@ tr:hover td {{ background: #ffffff06; }}
 
 .footer {{ text-align: center; color: var(--muted); font-size: 0.72rem;
   margin-top: 40px; padding-top: 14px; border-top: 1px solid var(--border); }}
+
+/* score input */
+.star-btn {{ background: none; border: none; cursor: pointer; font-size: 1rem;
+  color: var(--muted); padding: 0 2px; line-height: 1; transition: color .15s, transform .1s; }}
+.star-btn:hover {{ color: gold; transform: scale(1.2); }}
+.thumb.highlighted .star-btn {{ color: gold; }}
+.score-input {{ width: 46px; background: none; border: 1px solid var(--border);
+  border-radius: 5px; color: var(--muted); font-size: 0.72rem; padding: 2px 4px;
+  text-align: center; margin-left: auto; transition: border-color .15s, color .15s; }}
+.score-input:focus {{ outline: none; border-color: var(--accent); color: var(--text); }}
+.score-input:not(:placeholder-shown) {{ color: var(--accent); font-weight: 700; border-color: var(--accent); }}
+.score-view-section {{ margin-bottom: 32px; }}
+.score-view-section .section-title {{ margin-bottom: 12px; }}
+.score-view-grid {{ display: flex; flex-wrap: wrap; gap: 10px; }}
+.score-badge {{ position: absolute; top: 6px; left: 6px; background: var(--accent);
+  color: #fff; font-size: 0.72rem; font-weight: 700; border-radius: 6px;
+  padding: 2px 7px; pointer-events: none; }}
+.thumb {{ position: relative; }}
+
+/* save warning toast */
+.save-toast {{ position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: #ca8a04; color: #fff; padding: 11px 20px; border-radius: 10px;
+  font-size: 0.85rem; font-weight: 500; box-shadow: 0 4px 16px #0006;
+  z-index: 500; display: none; align-items: center; gap: 12px; max-width: 480px; text-align: center; }}
+.save-toast.show {{ display: flex; }}
+.save-toast button {{ background: none; border: 1px solid #fff8; border-radius: 6px;
+  color: #fff; cursor: pointer; font-size: 0.78rem; padding: 3px 10px; white-space: nowrap; }}
+
+/* highlight modal */
+.hl-btn {{ position: fixed; bottom: 24px; right: 24px; z-index: 100;
+  background: var(--accent); color: #fff; border: none; border-radius: 24px;
+  padding: 10px 18px; font-size: 0.88rem; font-weight: 600; cursor: pointer;
+  box-shadow: 0 4px 16px #0006; transition: opacity .15s; }}
+.hl-btn:hover {{ opacity: .85; }}
+.hl-overlay {{ display: none; position: fixed; inset: 0; background: #0008;
+  z-index: 200; align-items: center; justify-content: center; }}
+.hl-overlay.open {{ display: flex; }}
+.hl-modal {{ background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: 28px; width: 520px; max-width: 95vw;
+  box-shadow: 0 8px 40px #0008; }}
+.hl-modal h3 {{ margin: 0 0 6px; font-size: 1rem; }}
+.hl-modal p {{ color: var(--muted); font-size: 0.8rem; margin: 0 0 14px; }}
+.hl-modal textarea {{ width: 100%; height: 160px; background: var(--bg);
+  border: 1px solid var(--border); border-radius: 8px; color: var(--text);
+  font-size: 0.82rem; font-family: monospace; padding: 10px; resize: vertical; outline: none; }}
+.hl-modal textarea:focus {{ border-color: var(--accent); }}
+.hl-modal-foot {{ display: flex; justify-content: space-between; align-items: center;
+  margin-top: 14px; gap: 10px; }}
+.hl-count {{ font-size: 0.8rem; color: var(--muted); }}
+.hl-modal-foot button {{ padding: 8px 18px; border-radius: 8px; border: none;
+  cursor: pointer; font-size: 0.88rem; font-weight: 600; }}
+.hl-apply {{ background: var(--accent); color: #fff; }}
+.hl-clear {{ background: var(--surface2); color: var(--text); }}
+.thumb.highlighted {{ border: 2px solid var(--accent) !important;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 40%, transparent),
+              0 0 20px 6px color-mix(in srgb, var(--accent) 35%, transparent); }}
 </style>
 </head>
 <body>
@@ -560,7 +622,10 @@ function togglePromptTable() {{
 <div class="section">
   <div class="section-title" style="display:flex;align-items:center;justify-content:space-between">
     <span id="participants-title">Participants ({len(sorted_participants)}) — sorted by entry count</span>
-    <button class="timeline-btn" id="timeline-btn" onclick="toggleTimeline()">🕐 Timeline view</button>
+    <div style="display:flex;gap:8px">
+      <button class="timeline-btn" id="hl-only-btn" onclick="toggleHLOnly()">★ Highlights only</button>
+      <button class="timeline-btn" id="timeline-btn" onclick="toggleTimeline()">🕐 Timeline view</button>
+    </div>
   </div>
   <div id="participant-cards" class="p-cards">{participant_cards}</div>
   <div id="timeline-grid" style="display:none"></div>
@@ -594,7 +659,244 @@ function toggleTimeline() {{
     grid.style.display = 'flex';
     btn.textContent = '👥 By participant';
     title.textContent = 'All entries — chronological';
+    if (_hlOnly) {{
+      grid.querySelectorAll('.thumb').forEach(t => {{
+        t.style.display = t.classList.contains('highlighted') ? '' : 'none';
+      }});
+    }}
   }}
+}}
+</script>
+
+<script>
+const _SCORE_NS = 'civit_score_{bounty_id}_';
+const _TOAST_KEY = 'civit_save_warned_{bounty_id}';
+let _toastShown = false;
+function showSaveToast() {{
+  if (_toastShown || localStorage.getItem(_TOAST_KEY)) return;
+  _toastShown = true;
+  document.getElementById('save-toast').classList.add('show');
+}}
+function dismissToast() {{
+  localStorage.setItem(_TOAST_KEY, '1');
+  document.getElementById('save-toast').classList.remove('show');
+}}
+const _SAVED_SCORES = {saved_scores_json};
+const _SAVED_HIGHLIGHTS = {saved_highlights_json};
+
+function saveScore(input) {{
+  showSaveToast();
+  const val = input.value.trim();
+  const key = _SCORE_NS + input.dataset.id;
+  if (val === '') localStorage.removeItem(key);
+  else localStorage.setItem(key, val);
+  document.querySelectorAll(`.score-input[data-id="${{input.dataset.id}}"]`).forEach(el => {{
+    if (el !== input) el.value = val;
+  }});
+}}
+
+function loadScores() {{
+  document.querySelectorAll('.score-input').forEach(input => {{
+    const lsVal = localStorage.getItem(_SCORE_NS + input.dataset.id);
+    if (lsVal !== null) {{ input.value = lsVal; return; }}
+    const saved = _SAVED_SCORES[input.dataset.id];
+    if (saved !== undefined) {{ input.value = saved; localStorage.setItem(_SCORE_NS + input.dataset.id, saved); }}
+  }});
+  if (_SAVED_HIGHLIGHTS.length) {{
+    document.querySelectorAll('.thumb[data-url]').forEach(t => {{
+      const match = _SAVED_HIGHLIGHTS.includes(t.dataset.url);
+      if (match) {{
+        t.classList.add('highlighted');
+        const sb = t.querySelector('.star-btn');
+        if (sb) sb.textContent = '★';
+      }}
+    }});
+  }}
+}}
+
+async function saveScoresToServer() {{
+  const scores = {{}};
+  document.querySelectorAll('.score-input').forEach(input => {{
+    const v = input.value.trim();
+    if (v !== '') scores[input.dataset.id] = parseInt(v);
+  }});
+  const highlights = Array.from(document.querySelectorAll('.thumb.highlighted[data-url]'))
+    .map(t => t.dataset.url)
+    .filter((u, i, a) => a.indexOf(u) === i);
+  const btn = document.getElementById('save-scores-btn');
+  btn.textContent = '💾 Saving…';
+  btn.disabled = true;
+  try {{
+    await fetch('{server_url}/save-scores', {{
+      method: 'POST',
+      headers: {{'Content-Type': 'application/json'}},
+      body: JSON.stringify({{bounty_id: {bounty_id}, scores, highlights}}),
+    }});
+    btn.textContent = '✓ Saved';
+    setTimeout(() => {{ btn.textContent = '💾 Save scores'; btn.disabled = false; }}, 2000);
+  }} catch(e) {{
+    btn.textContent = '✗ Error';
+    btn.disabled = false;
+  }}
+}}
+
+let _scoreViewOpen = false;
+function toggleScoreView() {{
+  const btn = document.getElementById('score-view-btn');
+  if (_scoreViewOpen) {{
+    document.getElementById('score-view-section').remove();
+    _scoreViewOpen = false;
+    btn.textContent = '🏅 Sort by score';
+    return;
+  }}
+  const scored = [];
+  document.querySelectorAll('.thumb[data-entry-id]').forEach(t => {{
+    const v = localStorage.getItem(_SCORE_NS + t.dataset.entryId);
+    if (v !== null && v !== '') scored.push({{ thumb: t, score: parseInt(v) }});
+  }});
+  if (!scored.length) {{ alert('No scores set yet.'); return; }}
+  scored.sort((a, b) => b.score - a.score);
+
+  const section = document.createElement('div');
+  section.id = 'score-view-section';
+  section.className = 'score-view-section';
+  section.innerHTML = '<div class="section-title" style="display:flex;align-items:center;gap:12px">🏅 Ranked entries <button onclick="resetScores()" style="font-size:0.75rem;padding:3px 10px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer">Reset scores</button></div><div class="score-view-grid" id="score-view-grid"></div>';
+  document.querySelector('.page-header').after(section);
+
+  const grid = section.querySelector('#score-view-grid');
+  scored.forEach(({{ thumb, score }}) => {{
+    const clone = thumb.cloneNode(true);
+    clone.querySelector('.thumb-user') && (clone.querySelector('.thumb-user').style.display = 'block');
+    const badge = document.createElement('div');
+    badge.className = 'score-badge';
+    badge.textContent = score;
+    clone.appendChild(badge);
+    grid.appendChild(clone);
+  }});
+  _scoreViewOpen = true;
+  btn.textContent = '✕ Close ranking';
+  section.scrollIntoView({{ behavior: 'smooth' }});
+}}
+
+function resetScores() {{
+  if (!confirm('Reset all scores?')) return;
+  document.querySelectorAll('.score-input').forEach(input => {{
+    localStorage.removeItem(_SCORE_NS + input.dataset.id);
+    input.value = '';
+  }});
+  document.getElementById('score-view-btn').click();
+}}
+
+let _hlOnly = false;
+function toggleHLOnly() {{
+  _hlOnly = !_hlOnly;
+  const btn = document.getElementById('hl-only-btn');
+  btn.textContent = _hlOnly ? '★ All entries' : '★ Highlights only';
+  btn.style.opacity = _hlOnly ? '1' : '';
+
+  document.querySelectorAll('.p-card').forEach(card => {{
+    const thumbs = card.querySelectorAll('.thumb');
+    let visible = 0;
+    thumbs.forEach(t => {{
+      const show = !_hlOnly || t.classList.contains('highlighted');
+      t.style.display = show ? '' : 'none';
+      if (show) visible++;
+    }});
+    card.style.display = (_hlOnly && visible === 0) ? 'none' : '';
+  }});
+
+  document.querySelectorAll('#timeline-grid .thumb').forEach(t => {{
+    const show = !_hlOnly || t.classList.contains('highlighted');
+    t.style.display = show ? '' : 'none';
+  }});
+}}
+
+document.addEventListener('DOMContentLoaded', loadScores);
+</script>
+
+<div class="save-toast" id="save-toast">
+  ⚠️ Scores & highlights are not saved automatically — click <b style="margin:0 4px">💾 Save scores & highlights</b> to persist them.
+  <button onclick="dismissToast()">Got it</button>
+</div>
+
+<button class="hl-btn" onclick="openHL()">🔖 Highlight entries</button>
+<button class="hl-btn" id="score-view-btn" style="bottom:70px" onclick="toggleScoreView()">🏅 Sort by score</button>
+<button class="hl-btn" id="save-scores-btn" style="bottom:116px" onclick="saveScoresToServer()">💾 Save scores & highlights</button>
+
+<div class="hl-overlay" id="hl-overlay" onclick="overlayClick(event)">
+  <div class="hl-modal">
+    <h3>🔖 Highlight entries</h3>
+    <p>Paste entry URLs below, one per line. Extra text after the URL (notes, usernames…) is ignored.<br>
+    Entries already starred <b>★</b> are pre-filled here. Closing the modal syncs all highlights.</p>
+    <textarea id="hl-input" oninput="showSaveToast()" placeholder="https://civitai.red/bounties/.../entries/265081&#10;https://civitai.red/bounties/.../entries/265082   optional note"></textarea>
+    <div class="hl-modal-foot">
+      <span class="hl-count" id="hl-count"></span>
+      <div style="display:flex;gap:8px">
+        <button class="hl-clear" onclick="clearHL()">Clear</button>
+        <button class="hl-apply" onclick="applyHL()">Apply & close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleStar(btn) {{
+  showSaveToast();
+  const thumb = btn.closest('.thumb');
+  const isHL = thumb.classList.toggle('highlighted');
+  btn.textContent = isHL ? '★' : '☆';
+  document.querySelectorAll(`.thumb[data-url="${{thumb.dataset.url}}"]`).forEach(t => {{
+    t.classList.toggle('highlighted', isHL);
+    const sb = t.querySelector('.star-btn');
+    if (sb) sb.textContent = isHL ? '★' : '☆';
+  }});
+}}
+
+function openHL() {{
+  const textarea = document.getElementById('hl-input');
+  const existing = textarea.value.split('\\n').map(l => l.trim()).filter(Boolean);
+  const starred = Array.from(document.querySelectorAll('.thumb.highlighted[data-url]'))
+    .map(t => t.dataset.url)
+    .filter((u, i, a) => a.indexOf(u) === i);
+  const merged = Array.from(new Set([...existing, ...starred]));
+  textarea.value = merged.join('\\n');
+  document.getElementById('hl-overlay').classList.add('open');
+  textarea.focus();
+}}
+function overlayClick(e) {{
+  if (e.target === document.getElementById('hl-overlay')) applyHL();
+}}
+function applyHL() {{
+  const raw = document.getElementById('hl-input').value.split('\\n');
+  const urls = raw.map(l => {{
+    const m = l.match(/https?:\\/\\/\\S+/);
+    return m ? m[0].split('?')[0].replace(/\\/+$/, '') : null;
+  }}).filter(Boolean);
+  const thumbs = document.querySelectorAll('.thumb[data-url]');
+  let count = 0;
+  thumbs.forEach(t => {{
+    const url = t.dataset.url.split('?')[0].replace(/\\/+$/, '');
+    const match = urls.some(u => url === u);
+    t.classList.toggle('highlighted', match);
+    const sb = t.querySelector('.star-btn');
+    if (sb) sb.textContent = match ? '★' : '☆';
+    if (match) count++;
+  }});
+  document.getElementById('hl-count').textContent = count ? `${{count}} highlighted` : '';
+  document.getElementById('hl-overlay').classList.remove('open');
+  if (count) {{
+    const first = document.querySelector('.thumb.highlighted');
+    if (first) first.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
+  }}
+}}
+function clearHL() {{
+  document.getElementById('hl-input').value = '';
+  document.querySelectorAll('.thumb.highlighted').forEach(t => {{
+    t.classList.remove('highlighted');
+    const sb = t.querySelector('.star-btn');
+    if (sb) sb.textContent = '☆';
+  }});
+  document.getElementById('hl-count').textContent = '';
 }}
 </script>
 

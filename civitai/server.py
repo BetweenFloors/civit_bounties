@@ -15,7 +15,10 @@ import traceback
 import webbrowser
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs, urlparse
+from pathlib import Path
 import argparse
+
+_EXPORT_DIR = Path(__file__).parent.parent / "export"
 
 from . import Civitai
 from .client import CivitaiError
@@ -233,12 +236,26 @@ class _Handler(BaseHTTPRequestHandler):
         self._respond(200, "text/html; charset=utf-8", _UI.encode())
 
     def do_POST(self):
-        if urlparse(self.path).path != "/generate":
-            self._respond(404, "text/plain", b"Not found")
-            return
-
+        path = urlparse(self.path).path
         length = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(length)
+
+        if path == "/save-scores":
+            try:
+                payload = json.loads(body)
+                bounty_id = int(payload["bounty_id"])
+                scores = payload.get("scores", {})
+                highlights = payload.get("highlights", [])
+                _EXPORT_DIR.mkdir(exist_ok=True)
+                (_EXPORT_DIR / f"{bounty_id}.json").write_text(json.dumps({"scores": scores, "highlights": highlights}))
+                self._json(200, {"ok": True})
+            except Exception:
+                self._json(500, {"error": traceback.format_exc().splitlines()[-1]})
+            return
+
+        if path != "/generate":
+            self._respond(404, "text/plain", b"Not found")
+            return
 
         try:
             payload = json.loads(body)
@@ -246,16 +263,25 @@ class _Handler(BaseHTTPRequestHandler):
             bounty_id = int(payload["bounty_id"])
             theme = payload.get("theme", "dark")
 
+            scores_path = _EXPORT_DIR / f"{bounty_id}.json"
+            saved = json.loads(scores_path.read_text()) if scores_path.exists() else {}
+            saved_scores = saved.get("scores", saved) if isinstance(saved, dict) else {}
+            saved_highlights = saved.get("highlights", []) if isinstance(saved, dict) else []
+
             civ = Civitai(api_token=token or None)
             report = civ.bounties.full_report(bounty_id)
-            html_out = generate_html(report, bounty_id, theme=theme)
+            server_url = f"http://localhost:{self.server.server_address[1]}"
+            html_out = generate_html(report, bounty_id, theme=theme, saved_scores=saved_scores, saved_highlights=saved_highlights, server_url=server_url)
 
             self._json(200, {"html": html_out})
 
         except CivitaiError as e:
             self._json(400, {"error": str(e)})
-        except Exception:
-            self._json(500, {"error": traceback.format_exc().splitlines()[-1]})
+        except Exception as e:
+            msg = traceback.format_exc().splitlines()[-1]
+            if any(f"HTTP {code}" in msg for code in ["520","521","522","523","524","525","526"]):
+                msg = f"Civitai's servers returned a Cloudflare error ({msg.split('HTTP')[1].strip().split(':')[0].strip()}) — this is a temporary issue on their end. Please try again in a few minutes."
+            self._json(500, {"error": msg})
 
     def _respond(self, code: int, ctype: str, body: bytes):
         self.send_response(code)
