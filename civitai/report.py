@@ -624,6 +624,7 @@ function togglePromptTable() {{
     <span id="participants-title">Participants ({len(sorted_participants)}) — sorted by entry count</span>
     <div style="display:flex;gap:8px">
       <button class="timeline-btn" id="hl-only-btn" onclick="toggleHLOnly()">★ Highlights only</button>
+      <button class="timeline-btn" id="zoom-btn" onclick="toggleZoom()">⊞ Wide thumbnails</button>
       <button class="timeline-btn" id="timeline-btn" onclick="toggleTimeline()">🕐 Timeline view</button>
     </div>
   </div>
@@ -785,6 +786,20 @@ function resetScores() {{
     input.value = '';
   }});
   document.getElementById('score-view-btn').click();
+}}
+
+let _zoom = false;
+function toggleZoom() {{
+  _zoom = !_zoom;
+  const btn = document.getElementById('zoom-btn');
+  btn.textContent = _zoom ? '⊟ Normal thumbnails' : '⊞ Wide thumbnails';
+  const style = document.getElementById('zoom-style') || (() => {{
+    const s = document.createElement('style');
+    s.id = 'zoom-style';
+    document.head.appendChild(s);
+    return s;
+  }})();
+  style.textContent = _zoom ? '.thumb {{ width: 300px !important; }}' : '';
 }}
 
 let _hlOnly = false;
