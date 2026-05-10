@@ -115,3 +115,9 @@ All processing runs locally. The CLI and server both make requests directly to `
 
 ![Report — prompt analysis](assets/UI_prompts.png)
 *prompt analysis: average token count, top words, and exclusive vocabulary*
+
+![Report — highlights](assets/UI_high.png)
+*highlighted entries with star toggle and "Highlights only" filter*
+
+![Report — scores](assets/UI_score.png)
+*per-entry scoring and ranked view*

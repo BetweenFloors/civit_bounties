@@ -716,11 +716,11 @@ function loadScores() {{
 
 async function saveScoresToServer() {{
   const scores = {{}};
-  document.querySelectorAll('.score-input').forEach(input => {{
+  document.querySelectorAll('#participant-cards .score-input').forEach(input => {{
     const v = input.value.trim();
     if (v !== '') scores[input.dataset.id] = parseInt(v);
   }});
-  const highlights = Array.from(document.querySelectorAll('.thumb.highlighted[data-url]'))
+  const highlights = Array.from(document.querySelectorAll('#participant-cards .thumb.highlighted[data-url]'))
     .map(t => t.dataset.url)
     .filter((u, i, a) => a.indexOf(u) === i);
   const btn = document.getElementById('save-scores-btn');
@@ -750,7 +750,7 @@ function toggleScoreView() {{
     return;
   }}
   const scored = [];
-  document.querySelectorAll('.thumb[data-entry-id]').forEach(t => {{
+  document.querySelectorAll('#participant-cards .thumb[data-entry-id]').forEach(t => {{
     const v = localStorage.getItem(_SCORE_NS + t.dataset.entryId);
     if (v !== null && v !== '') scored.push({{ thumb: t, score: parseInt(v) }});
   }});
