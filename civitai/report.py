@@ -28,10 +28,11 @@ def _img_url(uuid: str, name: str, width: int = 450) -> str:
     return f"{_IMG_CDN}/{uuid}/width={width}/{html.escape(name)}"
 
 
-def _fmt_date(iso: str) -> str:
+def _fmt_date(iso: str, with_time: bool = False) -> str:
     try:
         dt = datetime.fromisoformat(iso.replace("Z", "+00:00"))
-        return dt.strftime("%d %b %Y")
+        fmt = "%d %b %Y %H:%M UTC" if with_time else "%d %b %Y"
+        return dt.strftime(fmt)
     except Exception:
         return iso[:10]
 
@@ -252,7 +253,7 @@ def generate_html(report: dict, bounty_id: int, output_path: str | Path | None =
         import re as _re
         w_user = html.escape(winner["username"])
         w_entry_url = f"{_BOUNTY_BASE}/{bounty_id}/entries/{winner['entry_id']}"
-        w_desc = _re.sub(r"<[^>]+>", "", winner.get("description", "")).strip()
+        w_desc = _re.sub(r"<[^>]+>", "", winner.get("description") or "").strip()
         w_buzz = winner["awarded_buzz"]
         w_imgs = winner.get("images") or []
         w_img_tag = ""
@@ -550,7 +551,8 @@ tr:hover td {{ background: #ffffff06; }}
     <span class="expires-tag">{expires_label}</span>
   </h1>
   <div class="header-meta">
-    {_fmt_date(stats.starts_at)} → {_fmt_date(stats.expires_at)}
+    <span class="local-date" data-iso="{html.escape(stats.starts_at)}">{_fmt_date(stats.starts_at, with_time=True)}</span>
+    → <span class="local-date" data-iso="{html.escape(stats.expires_at)}">{_fmt_date(stats.expires_at, with_time=True)}</span>
     &nbsp;·&nbsp; Bounty #{bounty_id}
     &nbsp;·&nbsp; <a href="{bounty_url}" target="_blank">civitai.red</a>
   </div>
@@ -872,7 +874,18 @@ function toggleHLOnly() {{
   }});
 }}
 
-document.addEventListener('DOMContentLoaded', loadScores);
+document.addEventListener('DOMContentLoaded', () => {{
+  loadScores();
+  document.querySelectorAll('.local-date[data-iso]').forEach(el => {{
+    try {{
+      const dt = new Date(el.dataset.iso);
+      el.textContent = dt.toLocaleString(undefined, {{
+        day: '2-digit', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      }});
+    }} catch(e) {{}}
+  }});
+}});
 </script>
 
 <div class="save-toast" id="save-toast">
